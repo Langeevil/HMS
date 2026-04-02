@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-$basePath = '.';
+$basePath = '..';
 $usuario = $usuario ?? [];
 $formAction = $formAction ?? '#';
-require_once __DIR__ . '/includes/app.php';
+require_once __DIR__ . '/../includes/app.php';
 
 render_head('HMS - Cadastro', $basePath);
 ?>
@@ -32,7 +32,7 @@ render_head('HMS - Cadastro', $basePath);
                         <div class="mb-3"><label for="username" class="form-label">Usuario</label><input type="text" name="username" value="<?= h($usuario['username'] ?? '') ?>" class="form-control" id="username" required></div>
                         <div class="mb-4"><label for="password" class="form-label">Senha</label><input type="password" name="password" class="form-control" id="password" required></div>
                         <button class="w-100 btn btn-success btn-lg" type="submit">Cadastrar</button>
-                        <div class="mt-4 text-center text-muted">Ja tem uma conta? <a href="<?= h(url($basePath, 'login.php')) ?>" class="fw-semibold text-decoration-none">Entrar</a></div>
+                        <div class="mt-4 text-center text-muted">Ja tem uma conta? <a href="<?= h(url($basePath, 'pages/login.php')) ?>" class="fw-semibold text-decoration-none">Entrar</a></div>
                     </form>
                 </div>
             </div>

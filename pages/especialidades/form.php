@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
-$basePath = '..';
+$basePath = '../..';
 $usuarioLogado = $usuarioLogado ?? ['nome' => 'Usuario'];
 $especialidade = $especialidade ?? [];
 $formAction = $formAction ?? '#';
-require_once __DIR__ . '/../includes/app.php';
+require_once __DIR__ . '/../../includes/app.php';
 render_head('HMS - Nova Especialidade', $basePath, true);
 ?>
 <body class="admin-page">
@@ -18,7 +18,7 @@ render_head('HMS - Nova Especialidade', $basePath, true);
                     <div class="col-md-6"><label for="nome" class="form-label">Nome da especialidade</label><input type="text" name="nome" value="<?= h($especialidade['nome'] ?? '') ?>" class="form-control" id="nome" required></div>
                     <div class="col-md-6"><label for="descricao" class="form-label">Descricao</label><textarea name="descricao" class="form-control" id="descricao" rows="3"><?= h($especialidade['descricao'] ?? '') ?></textarea></div>
                 </div>
-                <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-success">Salvar</button><a href="<?= h(url($basePath, 'especialidades/listar.php')) ?>" class="btn btn-secondary">Cancelar</a></div>
+                <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-success">Salvar</button><a href="<?= h(url($basePath, 'pages/especialidades/listar.php')) ?>" class="btn btn-secondary">Cancelar</a></div>
             </form></div>
         </main>
     </div></div>

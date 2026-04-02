@@ -51,13 +51,13 @@ function render_scripts(): void
 function render_admin_sidebar(string $basePath, string $active): void
 {
     $items = [
-        'dashboard' => ['label' => 'Dashboard', 'icon' => 'bi-grid-1x2-fill', 'path' => 'dashboard.php'],
-        'medicos' => ['label' => 'Medicos', 'icon' => 'bi-person-badge', 'path' => 'medicos/listar.php'],
-        'pacientes' => ['label' => 'Pacientes', 'icon' => 'bi-people', 'path' => 'pacientes/listar.php'],
-        'leitos' => ['label' => 'Leitos', 'icon' => 'bi-hospital', 'path' => 'leitos/listar.php'],
-        'alas' => ['label' => 'Alas', 'icon' => 'bi-building', 'path' => 'alas/listar.php'],
-        'quartos' => ['label' => 'Quartos', 'icon' => 'bi-door-open', 'path' => 'quartos/listar.php'],
-        'especialidades' => ['label' => 'Especialidades', 'icon' => 'bi-clipboard2-pulse', 'path' => 'especialidades/listar.php'],
+        'dashboard' => ['label' => 'Dashboard', 'icon' => 'bi-grid-1x2-fill', 'path' => 'pages/dashboard.php'],
+        'medicos' => ['label' => 'Medicos', 'icon' => 'bi-person-badge', 'path' => 'pages/medicos/listar.php'],
+        'pacientes' => ['label' => 'Pacientes', 'icon' => 'bi-people', 'path' => 'pages/pacientes/listar.php'],
+        'leitos' => ['label' => 'Leitos', 'icon' => 'bi-hospital', 'path' => 'pages/leitos/listar.php'],
+        'alas' => ['label' => 'Alas', 'icon' => 'bi-building', 'path' => 'pages/alas/listar.php'],
+        'quartos' => ['label' => 'Quartos', 'icon' => 'bi-door-open', 'path' => 'pages/quartos/listar.php'],
+        'especialidades' => ['label' => 'Especialidades', 'icon' => 'bi-clipboard2-pulse', 'path' => 'pages/especialidades/listar.php'],
     ];
     ?>
             <nav class="col-lg-3 col-xl-2 sidebar">

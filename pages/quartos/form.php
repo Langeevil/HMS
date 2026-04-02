@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-$basePath = '..';
+$basePath = '../..';
 $usuarioLogado = $usuarioLogado ?? ['nome' => 'Usuario'];
 $quarto = $quarto ?? [];
 $alas = $alas ?? [];
 $formAction = $formAction ?? '#';
-require_once __DIR__ . '/../includes/app.php';
+require_once __DIR__ . '/../../includes/app.php';
 render_head('HMS - Novo Quarto', $basePath, true);
 ?>
 <body class="admin-page">
@@ -24,7 +24,7 @@ render_head('HMS - Novo Quarto', $basePath, true);
 <?php endforeach; ?>
                     </select></div>
                 </div>
-                <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-success">Salvar</button><a href="<?= h(url($basePath, 'quartos/listar.php')) ?>" class="btn btn-secondary">Cancelar</a></div>
+                <div class="mt-4 d-flex gap-2"><button type="submit" class="btn btn-success">Salvar</button><a href="<?= h(url($basePath, 'pages/quartos/listar.php')) ?>" class="btn btn-secondary">Cancelar</a></div>
             </form></div>
         </main>
     </div></div>

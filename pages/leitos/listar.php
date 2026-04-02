@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-$basePath = '..';
+$basePath = '../..';
 $usuarioLogado = $usuarioLogado ?? ['nome' => 'Usuario'];
 $leitos = $leitos ?? [];
-require_once __DIR__ . '/../includes/app.php';
+require_once __DIR__ . '/../../includes/app.php';
 render_head('HMS - Leitos', $basePath, true);
 ?>
 <body class="admin-page">

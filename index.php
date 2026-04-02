@@ -24,7 +24,7 @@ render_head('Hospital Management System - HMS', $basePath);
                     <li class="nav-item"><a class="nav-link active" href="#inicio">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="#sobre">Sobre</a></li>
                     <li class="nav-item"><a class="nav-link" href="#planos">Planos</a></li>
-                    <li class="nav-item ms-lg-3"><a href="<?= h(url($basePath, 'login.php')) ?>" class="btn btn-primary px-4">Entrar</a></li>
+                    <li class="nav-item ms-lg-3"><a href="<?= h(url($basePath, 'pages/login.php')) ?>" class="btn btn-primary px-4">Entrar</a></li>
                 </ul>
             </div>
         </div>
@@ -37,7 +37,7 @@ render_head('Hospital Management System - HMS', $basePath);
                 <h1 class="hero-title fw-bold">Gestao Hospitalar Inteligente</h1>
                 <p class="hero-copy mb-0">A solucao definitiva para administrar seu hospital com eficiencia e seguranca.</p>
                 <div class="hero-actions">
-                    <a href="<?= h(url($basePath, 'cadastro.php')) ?>" class="btn btn-light btn-lg px-5">Comecar Agora</a>
+                    <a href="<?= h(url($basePath, 'pages/cadastro.php')) ?>" class="btn btn-light btn-lg px-5">Comecar Agora</a>
                     <a href="#sobre" class="btn btn-outline-light btn-lg px-5">Saiba Mais</a>
                 </div>
             </div>
