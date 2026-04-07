@@ -1,6 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 $apiBaseUrl = 'http://localhost:8081';
+$authConfig = [
+    'login' => [
+        'attempts' => [
+            [
+                'endpoint' => '/login',
+                'content_type' => 'application/x-www-form-urlencoded',
+                'accept' => 'application/json, text/plain, */*',
+                'success_redirect_contains' => '/dashboard',
+            ],
+        ],
+    ],
+];
 
 $entityConfigs = [
     'alas' => [
@@ -165,51 +179,227 @@ $entityConfigs = [
     ],
 ];
 
-function apiRequest(string $method, string $endpoint, ?array $payload = null): array
+function apiBuildUrl(string $endpoint, array $query = []): string
 {
     global $apiBaseUrl;
 
     $url = rtrim($apiBaseUrl, '/') . $endpoint;
 
-    $ch = curl_init($url);
-
-    $headers = [
-        'Accept: application/json',
-        'Content-Type: application/json',
-    ];
-
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST => $method,
-        CURLOPT_HTTPHEADER => $headers,
-    ]);
-
-    if ($payload !== null) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));
+    if ($query !== []) {
+        $queryString = http_build_query($query);
+        $url .= str_contains($url, '?') ? '&' . $queryString : '?' . $queryString;
     }
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
+    return $url;
+}
 
-    curl_close($ch);
+function apiBuildHeaders(array $options = []): array
+{
+    $contentType = $options['content_type'] ?? 'application/json';
+    $accept = $options['accept'] ?? 'application/json';
 
-    if ($response === false) {
+    $headers = ['Accept: ' . $accept];
+
+    if ($contentType !== '') {
+        $headers[] = 'Content-Type: ' . $contentType;
+    }
+
+    if (!empty($options['headers']) && is_array($options['headers'])) {
+        $headers = array_merge($headers, $options['headers']);
+    }
+
+    return $headers;
+}
+
+function apiEncodePayload(?array $payload, string $contentType): ?string
+{
+    if ($payload === null) {
+        return null;
+    }
+
+    return match ($contentType) {
+        'application/x-www-form-urlencoded' => http_build_query($payload),
+        'application/json' => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        default => json_encode($payload, JSON_UNESCAPED_UNICODE),
+    };
+}
+
+function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlError, array $responseHeaders = []): array
+{
+    if ($rawBody === false) {
         return [
             'success' => false,
             'status' => $httpCode,
-            'error' => $error ?: 'Erro desconhecido ao chamar a API.',
+            'error' => $curlError !== '' ? $curlError : 'Erro desconhecido ao chamar a API.',
             'data' => null,
+            'headers' => $responseHeaders,
         ];
     }
 
-    $decoded = json_decode($response, true);
+    $decoded = json_decode($rawBody, true);
+    $data = json_last_error() === JSON_ERROR_NONE ? $decoded : $rawBody;
+
+    $errorMessage = null;
+
+    if ($httpCode >= 400) {
+        $errorMessage = is_array($decoded) ? ($decoded['message'] ?? $rawBody) : $rawBody;
+
+        if ($errorMessage === '' || $errorMessage === null) {
+            $errorMessage = 'A API respondeu com erro HTTP ' . $httpCode . '.';
+        }
+    }
 
     return [
         'success' => $httpCode >= 200 && $httpCode < 300,
         'status' => $httpCode,
-        'error' => $httpCode >= 400 ? ($decoded['message'] ?? $response) : null,
-        'data' => $decoded,
+        'error' => $errorMessage,
+        'data' => $data,
+        'headers' => $responseHeaders,
+    ];
+}
+
+function apiGetHeaderValue(array $headers, string $name): string|array|null
+{
+    $normalized = strtolower($name);
+    return $headers[$normalized] ?? null;
+}
+
+function apiRequest(string $method, string $endpoint, ?array $payload = null, array $options = []): array
+{
+    $query = $options['query'] ?? [];
+    $contentType = $options['content_type'] ?? 'application/json';
+    $url = apiBuildUrl($endpoint, is_array($query) ? $query : []);
+    $headers = apiBuildHeaders($options);
+    $responseHeaders = [];
+    $ch = curl_init($url);
+
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => strtoupper($method),
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_TIMEOUT => (int) ($options['timeout'] ?? 10),
+        CURLOPT_FOLLOWLOCATION => (bool) ($options['follow_redirects'] ?? false),
+        CURLOPT_HEADERFUNCTION => static function ($curlHandle, string $headerLine) use (&$responseHeaders): int {
+            $trimmed = trim($headerLine);
+            $length = strlen($headerLine);
+
+            if ($trimmed === '' || !str_contains($trimmed, ':')) {
+                return $length;
+            }
+
+            [$name, $value] = explode(':', $trimmed, 2);
+            $normalizedName = strtolower(trim($name));
+            $normalizedValue = trim($value);
+
+            if (isset($responseHeaders[$normalizedName])) {
+                if (!is_array($responseHeaders[$normalizedName])) {
+                    $responseHeaders[$normalizedName] = [$responseHeaders[$normalizedName]];
+                }
+
+                $responseHeaders[$normalizedName][] = $normalizedValue;
+            } else {
+                $responseHeaders[$normalizedName] = $normalizedValue;
+            }
+
+            return $length;
+        },
+    ]);
+
+    $body = apiEncodePayload($payload, $contentType);
+    if ($body !== null && !in_array(strtoupper($method), ['GET', 'DELETE'], true)) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+    }
+
+    $rawBody = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+
+    curl_close($ch);
+
+    return apiNormalizeResponse($rawBody, $httpCode, $curlError, $responseHeaders);
+}
+
+function authenticateUser(string $username, string $password): array
+{
+    global $authConfig;
+
+    $credentials = [
+        'username' => $username,
+        'password' => $password,
+    ];
+    $attemptErrors = [];
+    $bestFailure = null;
+
+    foreach ($authConfig['login']['attempts'] as $attempt) {
+        $query = !empty($attempt['send_as_query']) ? $credentials : [];
+        $payload = !empty($attempt['send_as_query']) ? null : $credentials;
+
+        $response = apiRequest('POST', $attempt['endpoint'], $payload, [
+            'content_type' => $attempt['content_type'] ?? 'application/json',
+            'accept' => $attempt['accept'] ?? 'application/json',
+            'query' => $query,
+            'follow_redirects' => $attempt['follow_redirects'] ?? false,
+            'timeout' => $attempt['timeout'] ?? 10,
+        ]);
+
+        $locationHeader = apiGetHeaderValue($response['headers'] ?? [], 'location');
+        $location = is_array($locationHeader) ? (string) end($locationHeader) : (string) ($locationHeader ?? '');
+        $redirectSuccess = $location !== ''
+            && !empty($attempt['success_redirect_contains'])
+            && str_contains($location, (string) $attempt['success_redirect_contains']);
+
+        if ($response['success'] || $redirectSuccess) {
+            if ($redirectSuccess && !is_array($response['data'])) {
+                $response['data'] = [
+                    'authenticated' => true,
+                    'user' => [
+                        'username' => $username,
+                    ],
+                ];
+            }
+
+            $response['success'] = true;
+            $response['auth_attempt'] = $attempt;
+            $response['debug_attempts'] = $attemptErrors;
+            return $response;
+        }
+
+        $status = (int) ($response['status'] ?? 0);
+        if (
+            $bestFailure === null
+            || $status >= 500
+            || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)
+        ) {
+            $bestFailure = [
+                'status' => $status,
+                'endpoint' => $attempt['endpoint'],
+                'error' => $response['error'] ?? null,
+            ];
+        }
+
+        $attemptErrors[] = sprintf(
+            '%s %s -> HTTP %d%s',
+            'POST',
+            $attempt['endpoint'],
+            (int) ($response['status'] ?? 0),
+            !empty($response['error']) ? ' (' . $response['error'] . ')' : ''
+        );
+    }
+
+    return [
+        'success' => false,
+        'status' => (int) ($bestFailure['status'] ?? 0),
+        'error' => $bestFailure !== null
+            ? sprintf(
+                'Falha ao autenticar na API. %s respondeu HTTP %d%s',
+                $bestFailure['endpoint'],
+                $bestFailure['status'],
+                !empty($bestFailure['error']) ? ' (' . $bestFailure['error'] . ')' : ''
+            )
+            : 'Falha ao autenticar na API.',
+        'data' => null,
+        'headers' => [],
+        'debug_attempts' => $attemptErrors,
     ];
 }
 

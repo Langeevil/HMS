@@ -2,9 +2,23 @@
 declare(strict_types=1);
 
 $basePath = '..';
-$usuarioLogado = $usuarioLogado ?? ['nome' => 'Usuario'];
-$totais = $totais ?? ['medicos' => 0, 'pacientes' => 0, 'leitos' => 0, 'alas' => 0, 'quartos' => 0];
 require_once __DIR__ . '/../includes/app.php';
+
+require_authentication(url($basePath, 'pages/login.php'));
+
+$usuarioLogado = current_user();
+$medicosResponse = fetchResourceList('medicos');
+$pacientesResponse = fetchResourceList('pacientes');
+$leitosResponse = fetchResourceList('leitos');
+$alasResponse = fetchResourceList('alas');
+$quartosResponse = fetchResourceList('quartos');
+$totais = [
+    'medicos' => count(is_array($medicosResponse['data'] ?? null) ? $medicosResponse['data'] : []),
+    'pacientes' => count(is_array($pacientesResponse['data'] ?? null) ? $pacientesResponse['data'] : []),
+    'leitos' => count(is_array($leitosResponse['data'] ?? null) ? $leitosResponse['data'] : []),
+    'alas' => count(is_array($alasResponse['data'] ?? null) ? $alasResponse['data'] : []),
+    'quartos' => count(is_array($quartosResponse['data'] ?? null) ? $quartosResponse['data'] : []),
+];
 
 render_head('HMS - Dashboard', $basePath, true);
 ?>
@@ -18,7 +32,7 @@ render_head('HMS - Dashboard', $basePath, true);
                         <h5 class="mb-1 fw-bold">Resumo do sistema</h5>
                         <p class="mb-0 text-muted">Acompanhe os principais modulos administrativos e a rotina da unidade em um unico painel.</p>
                     </div>
-<?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?>
+<?php render_user_menu(current_user_name(), url($basePath, 'pages/logout.php')); ?>
                 </header>
                 <section class="page-card mb-3">
                     <div class="row align-items-center g-3">

@@ -2,9 +2,53 @@
 declare(strict_types=1);
 
 $basePath = '..';
-$erro = $erro ?? null;
-$formAction = $formAction ?? '#';
 require_once __DIR__ . '/../includes/app.php';
+
+if (is_authenticated()) {
+    header('Location: ' . url($basePath, 'pages/dashboard.php'));
+    exit;
+}
+
+$erro = null;
+$formAction = $formAction ?? url($basePath, 'pages/login.php');
+$username = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim((string) ($_POST['username'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+
+    if ($username === '' || $password === '') {
+        $erro = 'Informe usuario e senha.';
+    } else {
+        $response = authenticateUser($username, $password);
+
+        if ($response['success']) {
+            $apiUser = [];
+            $responseData = $response['data'];
+            $apiSessionCookie = $response['headers']['set-cookie'] ?? null;
+
+            if (is_array($responseData)) {
+                $apiUser = $responseData['user'] ?? $responseData['usuario'] ?? $responseData;
+            }
+
+            if (!is_array($apiUser)) {
+                $apiUser = [];
+            }
+
+            if ($apiUser === []) {
+                $apiUser = ['username' => $username];
+            }
+
+            $_SESSION['auth_user'] = $apiUser;
+            $_SESSION['api_session_cookie'] = $apiSessionCookie;
+
+            header('Location: ' . url($basePath, 'pages/dashboard.php'));
+            exit;
+        }
+
+        $erro = $response['error'] ?: 'Falha ao autenticar na API.';
+    }
+}
 
 render_head('HMS - Login', $basePath);
 ?>
@@ -31,7 +75,7 @@ render_head('HMS - Login', $basePath);
 <?php if ($erro): ?>
                         <div class="alert alert-danger"><?= h($erro) ?></div>
 <?php endif; ?>
-                        <div class="mb-3"><label for="username" class="form-label">Usuario</label><input type="text" name="username" class="form-control" id="username" required></div>
+                        <div class="mb-3"><label for="username" class="form-label">Usuario</label><input type="text" name="username" value="<?= h($username) ?>" class="form-control" id="username" required></div>
                         <div class="mb-4"><label for="password" class="form-label">Senha</label><input type="password" name="password" class="form-control" id="password" required></div>
                         <button class="w-100 btn btn-primary btn-lg" type="submit">Entrar</button>
                         <div class="mt-4 text-center text-muted">Nao tem uma conta? <a href="<?= h(url($basePath, 'pages/cadastro.php')) ?>" class="fw-semibold text-decoration-none">Cadastre-se</a></div>

@@ -3,9 +3,19 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../assets/config/api_comunication.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 function h(mixed $value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
+
+function json_attr(mixed $value): string
+{
+    $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    return h($json === false ? '{}' : $json);
 }
 
 function url(string $basePath, string $path = ''): string
@@ -102,6 +112,54 @@ function render_user_menu(string $userName = 'Usuario', string $logoutHref = '#'
                             </ul>
                         </div>
 <?php
+}
+
+function current_user(): array
+{
+    $user = $_SESSION['auth_user'] ?? null;
+
+    return is_array($user) ? $user : [];
+}
+
+function current_user_name(): string
+{
+    $user = current_user();
+
+    foreach (['nome', 'name', 'username', 'login'] as $field) {
+        if (!empty($user[$field]) && is_scalar($user[$field])) {
+            return (string) $user[$field];
+        }
+    }
+
+    return 'Usuario';
+}
+
+function is_authenticated(): bool
+{
+    return current_user() !== [];
+}
+
+function require_authentication(string $redirectTo = '../login.php'): void
+{
+    if (is_authenticated()) {
+        return;
+    }
+
+    header('Location: ' . $redirectTo);
+    exit;
+}
+
+function set_flash(string $key, string $message): void
+{
+    $_SESSION['flash'][$key] = $message;
+}
+
+function get_flash(string $key): ?string
+{
+    $message = $_SESSION['flash'][$key] ?? null;
+    unset($_SESSION['flash'][$key]);
+
+    return is_string($message) ? $message : null;
 }
 
 function selected_attr(mixed $current, mixed $expected): string
