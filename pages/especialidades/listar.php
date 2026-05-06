@@ -21,8 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar a especialidade.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('especialidades', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Especialidade excluida com sucesso.');
+        header('Location: ' . url($basePath, 'pages/especialidades/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir a especialidade.';
+}
+
 $response = fetchResourceList('especialidades');
 $especialidades = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($especialidades as &$especialidade) {
+    $especialidade['excluir_url'] = url($basePath, 'pages/especialidades/listar.php?delete_id=' . ($especialidade['codespecialidade'] ?? ''));
+}
+unset($especialidade);
 render_head('HMS - Especialidades', $basePath, true);
 ?>
 <body class="admin-page">

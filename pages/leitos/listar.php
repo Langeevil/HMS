@@ -21,10 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar o leito.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('leitos', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Leito excluido com sucesso.');
+        header('Location: ' . url($basePath, 'pages/leitos/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir o leito.';
+}
+
 $quartosResponse = fetchResourceList('quartos');
 $quartos = is_array($quartosResponse['data'] ?? null) ? $quartosResponse['data'] : [];
 $response = fetchResourceList('leitos');
 $leitos = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($leitos as &$leito) {
+    $leito['excluir_url'] = url($basePath, 'pages/leitos/listar.php?delete_id=' . ($leito['codleito'] ?? ''));
+}
+unset($leito);
 render_head('HMS - Leitos', $basePath, true);
 ?>
 <body class="admin-page">
@@ -40,7 +56,7 @@ render_head('HMS - Leitos', $basePath, true);
 <?php endif; ?>
             <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th>Codigo</th><th>Quarto</th><th>Ala</th><th>Status</th><th class="text-end">Acoes</th></tr></thead><tbody>
 <?php if ($leitos === []): ?><?php empty_table_row(5, 'Nenhum leito carregado. Conecte esta tela ao retorno da API Java.'); ?><?php else: foreach ($leitos as $leito): ?>
-                <tr><td><?= h($leito['codleito'] ?? '-') ?></td><td><?= h($leito['quarto']['numero'] ?? '-') ?></td><td><?= h($leito['quarto']['ala']['nome'] ?? '-') ?></td><td><span class="badge bg-success"><?= h($leito['status'] ?? 'Disponivel') ?></span></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-leito" data-record="<?= json_attr($leito) ?>" data-bs-toggle="modal" data-bs-target="#editLeitoModal">Editar</button></td></tr>
+                <tr><td><?= h($leito['codleito'] ?? '-') ?></td><td><?= h($leito['quarto']['numero'] ?? '-') ?></td><td><?= h($leito['quarto']['ala']['nome'] ?? '-') ?></td><td><span class="badge bg-success"><?= h($leito['status'] ?? 'Disponivel') ?></span></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-leito" data-record="<?= json_attr($leito) ?>" data-bs-toggle="modal" data-bs-target="#editLeitoModal">Editar</button> <a href="<?= h($leito['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
 <?php endforeach; endif; ?>
             </tbody></table></div>
         </main>

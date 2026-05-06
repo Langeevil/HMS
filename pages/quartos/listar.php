@@ -21,10 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar o quarto.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('quartos', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Quarto excluido com sucesso.');
+        header('Location: ' . url($basePath, 'pages/quartos/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir o quarto.';
+}
+
 $alasResponse = fetchResourceList('alas');
 $alas = is_array($alasResponse['data'] ?? null) ? $alasResponse['data'] : [];
 $response = fetchResourceList('quartos');
 $quartos = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($quartos as &$quarto) {
+    $quarto['excluir_url'] = url($basePath, 'pages/quartos/listar.php?delete_id=' . ($quarto['codquarto'] ?? ''));
+}
+unset($quarto);
 render_head('HMS - Quartos', $basePath, true);
 ?>
 <body class="admin-page">

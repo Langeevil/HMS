@@ -21,10 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar o medico.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('medicos', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Medico excluido com sucesso.');
+        header('Location: ' . url($basePath, 'pages/medicos/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir o medico.';
+}
+
 $especialidadesResponse = fetchResourceList('especialidades');
 $especialidades = is_array($especialidadesResponse['data'] ?? null) ? $especialidadesResponse['data'] : [];
 $response = fetchResourceList('medicos');
 $medicos = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($medicos as &$medico) {
+    $medico['excluir_url'] = url($basePath, 'pages/medicos/listar.php?delete_id=' . ($medico['codmedico'] ?? ''));
+}
+unset($medico);
 render_head('HMS - Medicos', $basePath, true);
 ?>
 <body class="admin-page">

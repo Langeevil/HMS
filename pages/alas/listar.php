@@ -21,8 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar a ala.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('alas', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Ala excluida com sucesso.');
+        header('Location: ' . url($basePath, 'pages/alas/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir a ala.';
+}
+
 $response = fetchResourceList('alas');
 $alas = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($alas as &$ala) {
+    $ala['excluir_url'] = url($basePath, 'pages/alas/listar.php?delete_id=' . ($ala['codala'] ?? ''));
+}
+unset($ala);
 render_head('HMS - Alas', $basePath, true);
 ?>
 <body class="admin-page">

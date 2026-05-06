@@ -21,10 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $erro = $response['error'] ?: 'Nao foi possivel atualizar o paciente.';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
+    $response = deleteResource('pacientes', $_GET['delete_id']);
+
+    if ($response['success']) {
+        set_flash('success', 'Paciente excluido com sucesso.');
+        header('Location: ' . url($basePath, 'pages/pacientes/listar.php'));
+        exit;
+    }
+
+    $erro = $response['error'] ?: 'Nao foi possivel excluir o paciente.';
+}
+
 $tiposResponse = fetchResourceList('tipos-sanguineos');
 $tiposSanguineos = is_array($tiposResponse['data'] ?? null) ? $tiposResponse['data'] : [];
 $response = fetchResourceList('pacientes');
 $pacientes = is_array($response['data'] ?? null) ? $response['data'] : [];
+foreach ($pacientes as &$paciente) {
+    $paciente['excluir_url'] = url($basePath, 'pages/pacientes/listar.php?delete_id=' . ($paciente['codpaciente'] ?? ''));
+}
+unset($paciente);
 render_head('HMS - Pacientes', $basePath, true);
 ?>
 <body class="admin-page">
