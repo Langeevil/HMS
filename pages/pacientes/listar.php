@@ -10,7 +10,10 @@ $flash = get_flash('success');
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'edit_paciente') {
-    $response = saveResource('pacientes', $_POST);
+    $codpaciente = $_POST['codpaciente'] ?? '';
+    $response = $codpaciente !== ''
+        ? updateResource('pacientes', $codpaciente, $_POST)
+        : ['success' => false, 'error' => 'Código do paciente nao informado.'];
 
     if ($response['success']) {
         set_flash('success', 'Paciente atualizado com sucesso.');
@@ -18,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel atualizar o paciente.';
+    $erro = $response['error'] ?: 'Não foi possível atualizar o paciente.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
@@ -30,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel excluir o paciente.';
+    $erro = $response['error'] ?: 'Não foi possível excluir o paciente.';
 }
 
 $tiposResponse = fetchResourceList('tipos-sanguineos');
@@ -47,16 +50,16 @@ render_head('HMS - Pacientes', $basePath, true);
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'pacientes'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Pacientes</h1><p class="text-muted mb-0">Leitura mais clara para dados administrativos e de identificacao.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/pacientes/form.php')) ?>" class="btn btn-primary">Novo paciente</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Pacientes</h1><p class="text-muted mb-0">Leitura mais clara para dados administrativos e de identificação.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/pacientes/form.php')) ?>" class="btn btn-primary">Novo paciente</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
 <?php if ($flash): ?>
-            <div class="alert alert-success"><?= h($flash) ?></div>
+            <div class="alert alert-success" role="status"><?= h($flash) ?></div>
 <?php endif; ?>
 <?php if ($erro): ?>
-            <div class="alert alert-danger"><?= h($erro) ?></div>
+            <div class="alert alert-danger" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
-            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th>CPF</th><th>Nome</th><th>Data nascimento</th><th>Tipo sanguineo</th><th class="text-end">Acoes</th></tr></thead><tbody>
+            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th scope="col">CPF</th><th scope="col">Nome</th><th scope="col">Data nascimento</th><th scope="col">Tipo sanguíneo</th><th scope="col" class="text-end">Ações</th></tr></thead><tbody>
 <?php if ($pacientes === []): ?><?php empty_table_row(5, 'Nenhum paciente carregado. Conecte esta tela ao retorno da API Java.'); ?><?php else: foreach ($pacientes as $paciente): ?>
-                <tr><td><?= h($paciente['cpf'] ?? '-') ?></td><td><?= h($paciente['nome'] ?? '-') ?></td><td><?= h($paciente['dataNascimentoFormatada'] ?? $paciente['dataNascimento'] ?? '-') ?></td><td><?= h(trim(($paciente['tipoSanguineo']['tipo'] ?? '') . ' ' . ($paciente['tipoSanguineo']['fatorrh'] ?? '')) ?: '-') ?></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-paciente" data-record="<?= json_attr($paciente) ?>" data-bs-toggle="modal" data-bs-target="#editPacienteModal">Editar</button> <a href="<?= h($paciente['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
+                <tr><td><?= h($paciente['cpf'] ?? '-') ?></td><td><?= h($paciente['nome'] ?? '-') ?></td><td><?= h($paciente['dataNascimentoFormatada'] ?? $paciente['dataNascimento'] ?? '-') ?></td><td><?= h((trim(($paciente['tipoSanguineo']['tipo'] ?? '') . ' ' . ($paciente['tipoSanguineo']['fatorrh'] ?? '')) ?: ($paciente['codtipo'] ?? '-'))) ?></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-paciente" data-record="<?= json_attr($paciente) ?>" data-bs-toggle="modal" data-bs-target="#editPacienteModal">Editar</button> <a href="<?= h($paciente['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
 <?php endforeach; endif; ?>
             </tbody></table></div>
         </main>
@@ -86,7 +89,7 @@ render_head('HMS - Pacientes', $basePath, true);
                             <input type="date" class="form-control" name="dataNascimento" id="edit-paciente-data" required>
                         </div>
                         <div class="mb-3">
-                            <label for="edit-paciente-codtipo" class="form-label">Tipo sanguineo</label>
+                            <label for="edit-paciente-codtipo" class="form-label">Tipo sanguíneo</label>
                             <select class="form-select" name="codtipo" id="edit-paciente-codtipo" required>
                                 <option value="">Selecione...</option>
 <?php foreach ($tiposSanguineos as $tipo): ?>
@@ -97,7 +100,7 @@ render_head('HMS - Pacientes', $basePath, true);
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar alteracoes</button>
+                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
                     </div>
                 </form>
             </div>
@@ -111,7 +114,7 @@ render_head('HMS - Pacientes', $basePath, true);
                 document.getElementById('edit-paciente-nome').value = record.nome || '';
                 document.getElementById('edit-paciente-cpf').value = record.cpf || '';
                 document.getElementById('edit-paciente-data').value = record.dataNascimento || '';
-                document.getElementById('edit-paciente-codtipo').value = record.tipoSanguineo?.codtipo || '';
+                document.getElementById('edit-paciente-codtipo').value = record.codtipo || record.tipoSanguineo?.codtipo || '';
             });
         });
     </script>

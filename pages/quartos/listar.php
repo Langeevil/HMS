@@ -10,7 +10,10 @@ $flash = get_flash('success');
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'edit_quarto') {
-    $response = saveResource('quartos', $_POST);
+    $codquarto = $_POST['codquarto'] ?? '';
+    $response = $codquarto !== ''
+        ? updateResource('quartos', $codquarto, $_POST)
+        : ['success' => false, 'error' => 'Código do quarto nao informado.'];
 
     if ($response['success']) {
         set_flash('success', 'Quarto atualizado com sucesso.');
@@ -18,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel atualizar o quarto.';
+    $erro = $response['error'] ?: 'Não foi possível atualizar o quarto.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
@@ -30,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel excluir o quarto.';
+    $erro = $response['error'] ?: 'Não foi possível excluir o quarto.';
 }
 
 $alasResponse = fetchResourceList('alas');
@@ -47,16 +50,16 @@ render_head('HMS - Quartos', $basePath, true);
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'quartos'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Quartos</h1><p class="text-muted mb-0">Tabela modernizada sem alterar a disposicao dos dados operacionais.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/quartos/form.php')) ?>" class="btn btn-primary">Novo quarto</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Quartos</h1><p class="text-muted mb-0">Tabela modernizada sem alterar a disposição dos dados operacionais.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/quartos/form.php')) ?>" class="btn btn-primary">Novo quarto</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
 <?php if ($flash): ?>
-            <div class="alert alert-success"><?= h($flash) ?></div>
+            <div class="alert alert-success" role="status"><?= h($flash) ?></div>
 <?php endif; ?>
 <?php if ($erro): ?>
-            <div class="alert alert-danger"><?= h($erro) ?></div>
+            <div class="alert alert-danger" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
-            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th>Numero</th><th>Tipo</th><th>Ala</th><th class="text-end">Acoes</th></tr></thead><tbody>
+            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th scope="col">Número</th><th scope="col">Tipo</th><th scope="col">Ala</th><th scope="col" class="text-end">Ações</th></tr></thead><tbody>
 <?php if ($quartos === []): ?><?php empty_table_row(4, 'Nenhum quarto carregado. Conecte esta tela ao retorno da API Java.'); ?><?php else: foreach ($quartos as $quarto): ?>
-                <tr><td><?= h($quarto['numero'] ?? '-') ?></td><td><?= h($quarto['tipo'] ?? '-') ?></td><td><?= h($quarto['ala']['nome'] ?? '-') ?></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-quarto" data-record="<?= json_attr($quarto) ?>" data-bs-toggle="modal" data-bs-target="#editQuartoModal">Editar</button> <a href="<?= h($quarto['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
+                <tr><td><?= h($quarto['numero'] ?? '-') ?></td><td><?= h($quarto['tipo'] ?? '-') ?></td><td><?= h($quarto['ala']['nome'] ?? ($quarto['codala'] ?? '-')) ?></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-quarto" data-record="<?= json_attr($quarto) ?>" data-bs-toggle="modal" data-bs-target="#editQuartoModal">Editar</button> <a href="<?= h($quarto['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
 <?php endforeach; endif; ?>
             </tbody></table></div>
         </main>
@@ -74,7 +77,7 @@ render_head('HMS - Quartos', $basePath, true);
                         <input type="hidden" name="form_action" value="edit_quarto">
                         <input type="hidden" name="codquarto" id="edit-quarto-codigo">
                         <div class="mb-3">
-                            <label for="edit-quarto-numero" class="form-label">Numero</label>
+                            <label for="edit-quarto-numero" class="form-label">Número</label>
                             <input type="number" class="form-control" name="numero" id="edit-quarto-numero" required>
                         </div>
                         <div class="mb-3">
@@ -93,7 +96,7 @@ render_head('HMS - Quartos', $basePath, true);
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar alteracoes</button>
+                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
                     </div>
                 </form>
             </div>
@@ -106,7 +109,7 @@ render_head('HMS - Quartos', $basePath, true);
                 document.getElementById('edit-quarto-codigo').value = record.codquarto || '';
                 document.getElementById('edit-quarto-numero').value = record.numero || '';
                 document.getElementById('edit-quarto-tipo').value = record.tipo || '';
-                document.getElementById('edit-quarto-codala').value = record.ala?.codala || '';
+                document.getElementById('edit-quarto-codala').value = record.codala || record.ala?.codala || '';
             });
         });
     </script>

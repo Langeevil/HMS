@@ -28,7 +28,7 @@ $entityConfigs = [
             ['name' => 'andar', 'label' => 'Andar', 'type' => 'number', 'required' => false],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codala'],
+            ['label' => 'Código', 'path' => 'codala'],
             ['label' => 'Nome', 'path' => 'nome'],
             ['label' => 'Andar', 'path' => 'andar'],
         ],
@@ -41,12 +41,12 @@ $entityConfigs = [
         'summary' => 'Especialidades medicas.',
         'fields' => [
             ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
-            ['name' => 'descricao', 'label' => 'Descricao', 'type' => 'text', 'required' => false],
+            ['name' => 'descricao', 'label' => 'Descrição', 'type' => 'text', 'required' => false],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codespecialidade'],
+            ['label' => 'Código', 'path' => 'codespecialidade'],
             ['label' => 'Nome', 'path' => 'nome'],
-            ['label' => 'Descricao', 'path' => 'descricao'],
+            ['label' => 'Descrição', 'path' => 'descricao'],
         ],
     ],
     'tipos-sanguineos' => [
@@ -60,17 +60,17 @@ $entityConfigs = [
             ['name' => 'fatorrh', 'label' => 'Fator RH', 'type' => 'text', 'required' => true],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codtipo'],
+            ['label' => 'Código', 'path' => 'codtipo'],
             ['label' => 'Tipo', 'path' => 'tipo'],
             ['label' => 'Fator RH', 'path' => 'fatorrh'],
         ],
     ],
     'medicos' => [
-        'label' => 'Medicos',
-        'singular' => 'Medico',
+        'label' => 'Médicos',
+        'singular' => 'Médico',
         'endpoint' => '/api/medicos',
         'primary_keys' => ['codmedico'],
-        'summary' => 'Cadastro de medicos e especialidades.',
+        'summary' => 'Cadastro de médicos e especialidades.',
         'fields' => [
             ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
             ['name' => 'crm', 'label' => 'CRM', 'type' => 'text', 'required' => true],
@@ -83,11 +83,10 @@ $entityConfigs = [
                 'options_resource' => 'especialidades',
                 'option_value' => 'codespecialidade',
                 'option_label' => 'nome',
-                'source' => 'especialidade.codespecialidade',
             ],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codmedico'],
+            ['label' => 'Código', 'path' => 'codmedico'],
             ['label' => 'Nome', 'path' => 'nome'],
             ['label' => 'CRM', 'path' => 'crm'],
             ['label' => 'Telefone', 'path' => 'telefone'],
@@ -99,7 +98,7 @@ $entityConfigs = [
         'singular' => 'Paciente',
         'endpoint' => '/api/pacientes',
         'primary_keys' => ['codpaciente'],
-        'summary' => 'Cadastro de pacientes e tipo sanguineo.',
+        'summary' => 'Cadastro de pacientes e tipo sanguíneo.',
         'fields' => [
             ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
             ['name' => 'cpf', 'label' => 'CPF', 'type' => 'text', 'required' => true],
@@ -112,11 +111,10 @@ $entityConfigs = [
                 'options_resource' => 'tipos-sanguineos',
                 'option_value' => 'codtipo',
                 'option_label' => 'tipo',
-                'source' => 'tipoSanguineo.codtipo',
             ],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codpaciente'],
+            ['label' => 'Código', 'path' => 'codpaciente'],
             ['label' => 'Nome', 'path' => 'nome'],
             ['label' => 'CPF', 'path' => 'cpf'],
             ['label' => 'Nascimento', 'path' => 'dataNascimento'],
@@ -131,7 +129,7 @@ $entityConfigs = [
         'primary_keys' => ['codquarto'],
         'summary' => 'Quartos vinculados a alas.',
         'fields' => [
-            ['name' => 'numero', 'label' => 'Numero', 'type' => 'number', 'required' => true],
+            ['name' => 'numero', 'label' => 'Número', 'type' => 'number', 'required' => true],
             ['name' => 'tipo', 'label' => 'Tipo', 'type' => 'text', 'required' => false],
             [
                 'name' => 'codala',
@@ -141,12 +139,11 @@ $entityConfigs = [
                 'options_resource' => 'alas',
                 'option_value' => 'codala',
                 'option_label' => 'nome',
-                'source' => 'ala.codala',
             ],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codquarto'],
-            ['label' => 'Numero', 'path' => 'numero'],
+            ['label' => 'Código', 'path' => 'codquarto'],
+            ['label' => 'Número', 'path' => 'numero'],
             ['label' => 'Tipo', 'path' => 'tipo'],
             ['label' => 'Ala', 'path' => 'ala.nome'],
         ],
@@ -155,9 +152,11 @@ $entityConfigs = [
         'label' => 'Leitos',
         'singular' => 'Leito',
         'endpoint' => '/api/leitos',
+        'available_endpoint' => '/api/leitos/disponiveis',
         'primary_keys' => ['codleito'],
         'summary' => 'Leitos vinculados a quartos.',
         'fields' => [
+            ['name' => 'numero', 'label' => 'Número', 'type' => 'number', 'required' => true],
             ['name' => 'status', 'label' => 'Status', 'type' => 'text', 'required' => true],
             [
                 'name' => 'codquarto',
@@ -167,11 +166,11 @@ $entityConfigs = [
                 'options_resource' => 'quartos',
                 'option_value' => 'codquarto',
                 'option_label' => 'numero',
-                'source' => 'quarto.codquarto',
             ],
         ],
         'columns' => [
-            ['label' => 'Codigo', 'path' => 'codleito'],
+            ['label' => 'Código', 'path' => 'codleito'],
+            ['label' => 'Número', 'path' => 'numero'],
             ['label' => 'Status', 'path' => 'status'],
             ['label' => 'Quarto', 'path' => 'quarto.numero'],
             ['label' => 'Ala', 'path' => 'quarto.ala.nome'],
@@ -242,10 +241,22 @@ function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlE
     $errorMessage = null;
 
     if ($httpCode >= 400) {
-        $errorMessage = is_array($decoded) ? ($decoded['message'] ?? $rawBody) : $rawBody;
+        $errorMessage = is_array($decoded)
+            ? ($decoded['erro'] ?? $decoded['error'] ?? $decoded['message'] ?? $rawBody)
+            : $rawBody;
 
         if ($errorMessage === '' || $errorMessage === null) {
             $errorMessage = 'A API respondeu com erro HTTP ' . $httpCode . '.';
+        }
+
+        $statusMessages = [
+            400 => 'Dados inválidos',
+            404 => 'Registro não encontrado',
+            409 => 'Operação bloqueada por regra de negócio',
+        ];
+
+        if (isset($statusMessages[$httpCode])) {
+            $errorMessage = $statusMessages[$httpCode] . ': ' . $errorMessage;
         }
     }
 
@@ -277,7 +288,9 @@ function apiRequest(string $method, string $endpoint, ?array $payload = null, ar
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => strtoupper($method),
         CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_TIMEOUT => (int) ($options['timeout'] ?? 10),
+        CURLOPT_CONNECTTIMEOUT_MS => (int) ($options['connect_timeout_ms'] ?? 800),
+        CURLOPT_TIMEOUT_MS => (int) (($options['timeout_ms'] ?? (($options['timeout'] ?? 5) * 1000))),
+        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
         CURLOPT_FOLLOWLOCATION => (bool) ($options['follow_redirects'] ?? false),
         CURLOPT_HEADERFUNCTION => static function ($curlHandle, string $headerLine) use (&$responseHeaders): int {
             $trimmed = trim($headerLine);
@@ -466,11 +479,7 @@ function buildPayloadFromForm(string $resourceKey, array $formData): array
             ? $rawValue + 0
             : $rawValue;
 
-        if (!empty($field['source'])) {
-            setNestedValue($payload, $field['source'], $value);
-        } else {
-            $payload[$fieldName] = $value;
-        }
+        $payload[$fieldName] = $value;
     }
 
     return $payload;
@@ -479,8 +488,22 @@ function buildPayloadFromForm(string $resourceKey, array $formData): array
 function fetchResourceList(string $resourceKey): array
 {
     global $entityConfigs;
+    static $requestCache = [];
 
-    return apiRequest('GET', $entityConfigs[$resourceKey]['endpoint']);
+    if (isset($requestCache[$resourceKey])) {
+        return $requestCache[$resourceKey];
+    }
+
+    $requestCache[$resourceKey] = apiRequest('GET', $entityConfigs[$resourceKey]['endpoint']);
+
+    return $requestCache[$resourceKey];
+}
+
+function fetchAvailableLeitos(): array
+{
+    global $entityConfigs;
+
+    return apiRequest('GET', $entityConfigs['leitos']['available_endpoint']);
 }
 
 function fetchResourceById(string $resourceKey, int|string $id): array
@@ -499,9 +522,35 @@ function saveResource(string $resourceKey, array $formData): array
     return apiRequest('POST', $entityConfigs[$resourceKey]['endpoint'], $payload);
 }
 
+function updateResource(string $resourceKey, int|string $id, array $formData): array
+{
+    global $entityConfigs;
+
+    $payload = buildPayloadFromForm($resourceKey, $formData);
+    foreach ($entityConfigs[$resourceKey]['primary_keys'] as $primaryKey) {
+        unset($payload[$primaryKey]);
+    }
+
+    return apiRequest('PUT', $entityConfigs[$resourceKey]['endpoint'] . '/' . $id, $payload);
+}
+
 function deleteResource(string $resourceKey, int|string $id): array
 {
     global $entityConfigs;
 
     return apiRequest('DELETE', $entityConfigs[$resourceKey]['endpoint'] . '/' . $id);
+}
+
+function occupyLeito(int|string $id): array
+{
+    global $entityConfigs;
+
+    return apiRequest('PATCH', $entityConfigs['leitos']['endpoint'] . '/' . $id . '/ocupar');
+}
+
+function releaseLeito(int|string $id): array
+{
+    global $entityConfigs;
+
+    return apiRequest('PATCH', $entityConfigs['leitos']['endpoint'] . '/' . $id . '/liberar');
 }

@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel salvar o quarto.';
+    $erro = $response['error'] ?: 'Não foi possível salvar o quarto.';
 }
 
 render_head('HMS - Novo Quarto', $basePath, true);
@@ -31,14 +31,14 @@ render_head('HMS - Novo Quarto', $basePath, true);
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'quartos'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Novo quarto</h1><p class="text-muted mb-0">Formulario em superficie mais leve, mantendo a mesma sequencia de campos.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Novo quarto</h1><p class="text-muted mb-0">Formulário em superfície mais leve, mantendo a mesma sequência de campos.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
             <div class="page-card"><form action="<?= h($formAction) ?>" method="post">
 <?php if ($erro): ?>
-                <div class="alert alert-danger mb-3"><?= h($erro) ?></div>
+                <div class="alert alert-danger mb-3" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
                 <input type="hidden" name="codquarto" value="<?= h($quarto['codquarto'] ?? '') ?>">
                 <div class="row g-3">
-                    <div class="col-md-4"><label for="numero" class="form-label">Numero do quarto</label><input type="number" name="numero" value="<?= h($quarto['numero'] ?? '') ?>" class="form-control" id="numero" required></div>
+                    <div class="col-md-4"><label for="numero" class="form-label">Número do quarto</label><input type="number" name="numero" value="<?= h($quarto['numero'] ?? '') ?>" class="form-control" id="numero" required></div>
                     <div class="col-md-4"><label for="tipo" class="form-label">Tipo de quarto</label><input type="text" name="tipo" value="<?= h($quarto['tipo'] ?? '') ?>" class="form-control" id="tipo" placeholder="Ex: Particular"></div>
                     <div class="col-md-4"><label for="codala" class="form-label">Ala</label><select name="codala" class="form-select" id="codala" required><option value="">Selecione...</option>
 <?php foreach ($alas as $ala): ?>

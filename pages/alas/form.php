@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel salvar a ala.';
+    $erro = $response['error'] ?: 'Não foi possível salvar a ala.';
 }
 
 render_head('HMS - Nova Ala', $basePath, true);
@@ -29,10 +29,10 @@ render_head('HMS - Nova Ala', $basePath, true);
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'alas'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Nova ala</h1><p class="text-muted mb-0">Formulario remodelado mantendo a mesma hierarquia do conteudo.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Nova ala</h1><p class="text-muted mb-0">Formulário remodelado mantendo a mesma hierarquia do conteúdo.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
             <div class="page-card"><form action="<?= h($formAction) ?>" method="post">
 <?php if ($erro): ?>
-                <div class="alert alert-danger mb-3"><?= h($erro) ?></div>
+                <div class="alert alert-danger mb-3" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
                 <input type="hidden" name="codala" value="<?= h($ala['codala'] ?? '') ?>">
                 <div class="row g-3">

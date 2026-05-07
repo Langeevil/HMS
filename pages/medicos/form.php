@@ -17,24 +17,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $response = saveResource('medicos', $_POST);
 
     if ($response['success']) {
-        set_flash('success', 'Medico salvo com sucesso.');
+        set_flash('success', 'Médico salvo com sucesso.');
         header('Location: ' . url($basePath, 'pages/medicos/listar.php'));
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel salvar o medico.';
+    $erro = $response['error'] ?: 'Não foi possível salvar o médico.';
 }
 
-render_head('HMS - Novo Medico', $basePath, true);
+render_head('HMS - Novo Médico', $basePath, true);
 ?>
 <body class="admin-page">
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'medicos'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Novo medico</h1><p class="text-muted mb-0">Cadastro com campos mais legiveis e acabamento visual consistente.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Novo médico</h1><p class="text-muted mb-0">Cadastro com campos mais legíveis e acabamento visual consistente.</p></div><div class="toolbar-actions"><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
             <div class="page-card"><form action="<?= h($formAction) ?>" method="post">
 <?php if ($erro): ?>
-                <div class="alert alert-danger mb-3"><?= h($erro) ?></div>
+                <div class="alert alert-danger mb-3" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
                 <input type="hidden" name="codmedico" value="<?= h($medico['codmedico'] ?? '') ?>">
                 <div class="row g-3">

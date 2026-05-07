@@ -10,7 +10,10 @@ $flash = get_flash('success');
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'edit_especialidade') {
-    $response = saveResource('especialidades', $_POST);
+    $codespecialidade = $_POST['codespecialidade'] ?? '';
+    $response = $codespecialidade !== ''
+        ? updateResource('especialidades', $codespecialidade, $_POST)
+        : ['success' => false, 'error' => 'Código da especialidade nao informado.'];
 
     if ($response['success']) {
         set_flash('success', 'Especialidade atualizada com sucesso.');
@@ -18,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel atualizar a especialidade.';
+    $erro = $response['error'] ?: 'Não foi possível atualizar a especialidade.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
@@ -30,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
         exit;
     }
 
-    $erro = $response['error'] ?: 'Nao foi possivel excluir a especialidade.';
+    $erro = $response['error'] ?: 'Não foi possível excluir a especialidade.';
 }
 
 $response = fetchResourceList('especialidades');
@@ -45,14 +48,14 @@ render_head('HMS - Especialidades', $basePath, true);
     <div class="container-fluid admin-shell"><div class="row g-0">
 <?php render_admin_sidebar($basePath, 'especialidades'); ?>
         <main class="col-lg-9 col-xl-10 content">
-            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Especialidades</h1><p class="text-muted mb-0">Cadastro de areas clinicas em um layout mais atual e consistente.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/especialidades/form.php')) ?>" class="btn btn-primary">Nova especialidade</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuario'); ?></div></div>
+            <div class="page-toolbar"><div><h1 class="h2 fw-bold mb-1">Especialidades</h1><p class="text-muted mb-0">Cadastro de áreas clínicas em um layout mais atual e consistente.</p></div><div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/especialidades/form.php')) ?>" class="btn btn-primary">Nova especialidade</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div></div>
 <?php if ($flash): ?>
-            <div class="alert alert-success"><?= h($flash) ?></div>
+            <div class="alert alert-success" role="status"><?= h($flash) ?></div>
 <?php endif; ?>
 <?php if ($erro): ?>
-            <div class="alert alert-danger"><?= h($erro) ?></div>
+            <div class="alert alert-danger" role="alert"><?= h($erro) ?></div>
 <?php endif; ?>
-            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th>Nome</th><th>Descricao</th><th class="text-end">Acoes</th></tr></thead><tbody>
+            <div class="page-card table-shell"><table class="table table-hover align-middle"><thead><tr><th scope="col">Nome</th><th scope="col">Descrição</th><th scope="col" class="text-end">Ações</th></tr></thead><tbody>
 <?php if ($especialidades === []): ?><?php empty_table_row(3, 'Nenhuma especialidade carregada. Conecte esta tela ao retorno da API Java.'); ?><?php else: foreach ($especialidades as $especialidade): ?>
                 <tr><td><?= h($especialidade['nome'] ?? '-') ?></td><td><?= h($especialidade['descricao'] ?? '-') ?></td><td class="text-end"><button type="button" class="btn btn-sm btn-warning js-edit-especialidade" data-record="<?= json_attr($especialidade) ?>" data-bs-toggle="modal" data-bs-target="#editEspecialidadeModal">Editar</button> <a href="<?= h($especialidade['excluir_url'] ?? '#') ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</a></td></tr>
 <?php endforeach; endif; ?>
@@ -76,13 +79,13 @@ render_head('HMS - Especialidades', $basePath, true);
                             <input type="text" class="form-control" name="nome" id="edit-especialidade-nome" required>
                         </div>
                         <div class="mb-3">
-                            <label for="edit-especialidade-descricao" class="form-label">Descricao</label>
+                            <label for="edit-especialidade-descricao" class="form-label">Descrição</label>
                             <textarea class="form-control" name="descricao" id="edit-especialidade-descricao" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar alteracoes</button>
+                        <button type="submit" class="btn btn-primary">Salvar alterações</button>
                     </div>
                 </form>
             </div>

@@ -55,6 +55,29 @@ function render_scripts(): void
 {
     ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const toggle = document.querySelector('[data-sidebar-toggle]');
+            if (!toggle) {
+                return;
+            }
+
+            const storageKey = 'hms-sidebar-collapsed';
+            const applyState = function (collapsed) {
+                document.body.classList.toggle('sidebar-collapsed', collapsed);
+                toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                toggle.setAttribute('aria-label', collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral');
+            };
+
+            applyState(localStorage.getItem(storageKey) === '1');
+
+            toggle.addEventListener('click', function () {
+                const collapsed = !document.body.classList.contains('sidebar-collapsed');
+                localStorage.setItem(storageKey, collapsed ? '1' : '0');
+                applyState(collapsed);
+            });
+        })();
+    </script>
 </body>
 </html>
 <?php
@@ -64,7 +87,7 @@ function render_admin_sidebar(string $basePath, string $active): void
 {
     $items = [
         'dashboard' => ['label' => 'Dashboard', 'icon' => 'bi-grid-1x2-fill', 'path' => 'pages/dashboard.php'],
-        'medicos' => ['label' => 'Medicos', 'icon' => 'bi-person-badge', 'path' => 'pages/medicos/listar.php'],
+        'medicos' => ['label' => 'Médicos', 'icon' => 'bi-person-badge', 'path' => 'pages/medicos/listar.php'],
         'pacientes' => ['label' => 'Pacientes', 'icon' => 'bi-people', 'path' => 'pages/pacientes/listar.php'],
         'leitos' => ['label' => 'Leitos', 'icon' => 'bi-hospital', 'path' => 'pages/leitos/listar.php'],
         'alas' => ['label' => 'Alas', 'icon' => 'bi-building', 'path' => 'pages/alas/listar.php'],
@@ -72,18 +95,21 @@ function render_admin_sidebar(string $basePath, string $active): void
         'especialidades' => ['label' => 'Especialidades', 'icon' => 'bi-clipboard2-pulse', 'path' => 'pages/especialidades/listar.php'],
     ];
     ?>
-            <nav class="col-lg-3 col-xl-2 sidebar">
+            <nav class="col-lg-3 col-xl-2 sidebar" aria-label="Navegação administrativa">
                 <div class="sidebar-header">
                     <img src="<?= h(url($basePath, 'assets/images/logo.png')) ?>" alt="Logo HMS" class="brand-logo-image">
                     <div class="sidebar-brand-copy">
                         <span class="fw-bold fs-5">HMS Admin</span>
                         <small>Painel hospitalar</small>
                     </div>
+                    <button type="button" class="sidebar-toggle" data-sidebar-toggle aria-expanded="true" aria-label="Recolher menu lateral">
+                        <i class="bi bi-layout-sidebar-inset" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <div class="sidebar-section">Operacao</div>
+                <div class="sidebar-section">Operação</div>
 <?php foreach ($items as $key => $item): ?>
-                <a href="<?= h(url($basePath, $item['path'])) ?>"<?= $key === $active ? ' class="active"' : '' ?>>
-                    <i class="bi <?= h($item['icon']) ?>"></i>
+                <a href="<?= h(url($basePath, $item['path'])) ?>"<?= $key === $active ? ' class="active" aria-current="page"' : '' ?>>
+                    <i class="bi <?= h($item['icon']) ?>" aria-hidden="true"></i>
                     <span><?= h($item['label']) ?></span>
                 </a>
 <?php endforeach; ?>
@@ -91,24 +117,24 @@ function render_admin_sidebar(string $basePath, string $active): void
 <?php
 }
 
-function render_user_menu(string $userName = 'Usuario', string $logoutHref = '#'): void
+function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#'): void
 {
     ?>
                         <div class="dropdown">
-                            <div class="user-profile dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="user-profile dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menu do usuário">
                                 <div class="d-none d-md-block text-end">
                                     <div class="fw-bold small"><?= h($userName) ?></div>
-                                    <div class="text-muted" style="font-size: 0.78rem;">Administrador</div>
+                                    <div class="text-muted user-role">Administrador</div>
                                 </div>
                                 <div class="user-icon">
-                                    <i class="bi bi-person-fill"></i>
+                                    <i class="bi bi-person-fill" aria-hidden="true"></i>
                                 </div>
-                            </div>
+                            </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2"></i>Perfil</a></li>
-                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2"></i>Configuracoes</a></li>
+                                <li><button type="button" class="dropdown-item py-2" disabled><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</button></li>
+                                <li><button type="button" class="dropdown-item py-2" disabled><i class="bi bi-gear me-2" aria-hidden="true"></i>Configurações</button></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="<?= h($logoutHref) ?>"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="<?= h($logoutHref) ?>"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</a></li>
                             </ul>
                         </div>
 <?php
@@ -131,7 +157,7 @@ function current_user_name(): string
         }
     }
 
-    return 'Usuario';
+    return 'Usuário';
 }
 
 function is_authenticated(): bool
