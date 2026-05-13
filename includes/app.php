@@ -30,6 +30,11 @@ function url(string $basePath, string $path = ''): string
     return $target === '' ? $base : $base . '/' . $target;
 }
 
+function url_from_page(string $page): string
+{
+    return './' . $page;
+}
+
 function render_head(string $title, string $basePath, bool $withIcons = false): void
 {
     ?>
@@ -131,8 +136,8 @@ function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#
                                 </div>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><button type="button" class="dropdown-item py-2" disabled><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</button></li>
-                                <li><button type="button" class="dropdown-item py-2" disabled><i class="bi bi-gear me-2" aria-hidden="true"></i>Configurações</button></li>
+                                <li><a class="dropdown-item py-2" href="<?= h(url_from_page('profile.php')) ?>"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</a></li>
+                                <li><a class="dropdown-item py-2" href="<?= h(url_from_page('settings.php')) ?>"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configurações</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item py-2 text-danger" href="<?= h($logoutHref) ?>"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</a></li>
                             </ul>
