@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $codmedico = $_POST['codmedico'] ?? '';
     $response = $codmedico !== ''
         ? updateResource('medicos', $codmedico, $_POST)
-        : ['success' => false, 'error' => 'Código do medico nao informado.'];
+        : ['success' => false, 'error' => 'Código do médico não informado.'];
 
     if ($response['success']) {
         set_flash('success', 'Médico atualizado com sucesso.');

@@ -44,6 +44,14 @@ function render_head(string $title, string $basePath, bool $withIcons = false): 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= h($title) ?></title>
+    <script>
+        (function () {
+            const theme = localStorage.getItem('hms-theme');
+            if (theme && theme !== 'auto') {
+                document.documentElement.dataset.theme = theme;
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
@@ -124,6 +132,12 @@ function render_admin_sidebar(string $basePath, string $active): void
 
 function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#'): void
 {
+    $profileHref = $logoutHref !== '#'
+        ? preg_replace('/logout\.php(?:\?.*)?$/', 'profile.php', $logoutHref)
+        : url_from_page('profile.php');
+    $settingsHref = $logoutHref !== '#'
+        ? preg_replace('/logout\.php(?:\?.*)?$/', 'settings.php', $logoutHref)
+        : url_from_page('settings.php');
     ?>
                         <div class="dropdown">
                             <button type="button" class="user-profile dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menu do usuário">
@@ -136,8 +150,8 @@ function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#
                                 </div>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item py-2" href="<?= h(url_from_page('profile.php')) ?>"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</a></li>
-                                <li><a class="dropdown-item py-2" href="<?= h(url_from_page('settings.php')) ?>"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configurações</a></li>
+                                <li><a class="dropdown-item py-2" href="<?= h($profileHref ?? url_from_page('profile.php')) ?>"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</a></li>
+                                <li><a class="dropdown-item py-2" href="<?= h($settingsHref ?? url_from_page('settings.php')) ?>"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configurações</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item py-2 text-danger" href="<?= h($logoutHref) ?>"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sair</a></li>
                             </ul>
@@ -163,6 +177,61 @@ function current_user_name(): string
     }
 
     return 'Usuário';
+}
+
+function current_user_field(string $field, string $default = ''): string
+{
+    $user = current_user();
+    $value = $user[$field] ?? null;
+
+    return is_scalar($value) && $value !== '' ? (string) $value : $default;
+}
+
+function update_current_user(array $data): array
+{
+    $user = current_user();
+
+    foreach ($data as $key => $value) {
+        if (is_scalar($value)) {
+            $user[$key] = trim((string) $value);
+        }
+    }
+
+    $_SESSION['auth_user'] = $user;
+
+    return $user;
+}
+
+function default_user_settings(): array
+{
+    return [
+        'language' => 'pt-BR',
+        'timezone' => 'America/Sao_Paulo',
+        'system_notifications' => true,
+        'usage_data' => false,
+        'theme' => 'auto',
+        'compact_sidebar' => false,
+        'notify_patients' => true,
+        'notify_doctors' => true,
+        'notify_beds' => true,
+        'notify_alerts' => true,
+        'show_online_status' => true,
+        'show_recent_activity' => true,
+    ];
+}
+
+function current_user_settings(): array
+{
+    $settings = $_SESSION['user_settings'] ?? [];
+
+    return array_merge(default_user_settings(), is_array($settings) ? $settings : []);
+}
+
+function update_user_settings(array $settings): array
+{
+    $_SESSION['user_settings'] = array_merge(default_user_settings(), $settings);
+
+    return $_SESSION['user_settings'];
 }
 
 function is_authenticated(): bool

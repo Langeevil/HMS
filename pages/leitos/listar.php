@@ -104,7 +104,7 @@ render_head('HMS - Leitos', $basePath, true);
                 <div class="page-toolbar">
                     <div>
                         <h1 class="h2 fw-bold mb-1">Leitos</h1>
-                        <p class="text-muted mb-0">Monitoramento administrativo com acabamento mais contemporaneo.</p>
+                        <p class="text-muted mb-0">Monitoramento administrativo com acabamento mais contemporâneo.</p>
                     </div>
                     <div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/leitos/form.php')) ?>" class="btn btn-primary">Novo leito</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div>
                 </div>

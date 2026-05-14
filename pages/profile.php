@@ -7,6 +7,59 @@ require_once __DIR__ . '/../includes/app.php';
 require_authentication(url($basePath, 'pages/login.php'));
 
 $usuarioLogado = current_user();
+$flash = get_flash('success');
+$erro = null;
+$passwordNotice = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $formAction = $_POST['form_action'] ?? '';
+
+    if ($formAction === 'profile_update') {
+        $nome = trim((string) ($_POST['nome'] ?? ''));
+        $email = trim((string) ($_POST['email'] ?? ''));
+        $telefone = trim((string) ($_POST['telefone'] ?? ''));
+        $cargo = trim((string) ($_POST['cargo'] ?? 'Administrador'));
+
+        if ($nome === '') {
+            $erro = 'Informe o nome completo.';
+        } elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $erro = 'Informe um e-mail válido.';
+        } else {
+            $usuarioLogado = update_current_user([
+                'nome' => $nome,
+                'email' => $email,
+                'telefone' => $telefone,
+                'cargo' => $cargo !== '' ? $cargo : 'Administrador',
+            ]);
+
+            set_flash('success', 'Perfil atualizado com sucesso.');
+            header('Location: ' . url($basePath, 'pages/profile.php'));
+            exit;
+        }
+    }
+
+    if ($formAction === 'password_update') {
+        $newPassword = (string) ($_POST['new_password'] ?? '');
+        $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+        if ($newPassword === '' || $confirmPassword === '') {
+            $erro = 'Informe e confirme a nova senha.';
+        } elseif (strlen($newPassword) < 8) {
+            $erro = 'A nova senha deve ter pelo menos 8 caracteres.';
+        } elseif ($newPassword !== $confirmPassword) {
+            $erro = 'A confirmação da senha não confere.';
+        } else {
+            $_SESSION['password_change_requested_at'] = date('c');
+            $passwordNotice = 'A senha foi validada na interface, mas a API ainda precisa expor um endpoint de alteração de senha para persistir essa mudança.';
+        }
+    }
+}
+
+$nome = current_user_field('nome', current_user_name());
+$username = current_user_field('username', current_user_field('login', '-'));
+$email = current_user_field('email', '');
+$telefone = current_user_field('telefone', '');
+$cargo = current_user_field('cargo', 'Administrador');
 
 render_head('HMS - Perfil do Usuário', $basePath, true);
 ?>
@@ -17,78 +70,100 @@ render_head('HMS - Perfil do Usuário', $basePath, true);
             <main class="col-lg-9 col-xl-10 content-area content-shell">
                 <header class="top-header">
                     <div>
-                        <h5 class="mb-1 fw-bold">Meu Perfil</h5>
-                        <p class="mb-0 text-muted">Visualize e gerencie suas informações de perfil.</p>
+                        <h1 class="h2 fw-bold mb-1">Meu perfil</h1>
+                        <p class="mb-0 text-muted">Visualize e atualize as informações usadas no painel administrativo.</p>
                     </div>
 <?php render_user_menu(current_user_name(), url($basePath, 'pages/logout.php')); ?>
                 </header>
 
-                <div class="page-card mb-3">
-                    <h6 class="fw-bold mb-4 text-uppercase text-muted" style="font-size: 0.8rem; letter-spacing: 0.08em;">Informações Pessoais</h6>
-                    <div class="row g-4">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div style="width: 120px; height: 120px; border-radius: 20px; background: linear-gradient(135deg, rgba(87, 183, 200, 0.2), rgba(45, 156, 143, 0.2)); display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 2px solid rgba(18, 48, 68, 0.12);">
-                                    <i class="bi bi-person-fill" style="font-size: 3.5rem; color: var(--hms-primary);"></i>
-                                </div>
-                                <h5 class="fw-bold mt-3 mb-1"><?= h(current_user_name()) ?></h5>
-                                <p class="text-muted small mb-0">Administrador</p>
-                            </div>
+<?php if ($flash): ?>
+                <div class="alert alert-success" role="status"><?= h($flash) ?></div>
+<?php endif; ?>
+<?php if ($erro): ?>
+                <div class="alert alert-danger" role="alert"><?= h($erro) ?></div>
+<?php endif; ?>
+<?php if ($passwordNotice): ?>
+                <div class="alert alert-warning" role="status"><?= h($passwordNotice) ?></div>
+<?php endif; ?>
+
+                <div class="profile-grid">
+                    <section class="page-card profile-summary" aria-labelledby="profile-summary-title">
+                        <div class="profile-avatar" aria-hidden="true">
+                            <i class="bi bi-person-fill"></i>
                         </div>
-                        <div class="col-md-9">
+                        <h2 class="h4 fw-bold mt-3 mb-1" id="profile-summary-title"><?= h($nome) ?></h2>
+                        <p class="text-muted mb-3"><?= h($cargo) ?></p>
+                        <dl class="profile-meta">
+                            <div>
+                                <dt>Usuário</dt>
+                                <dd><?= h($username) ?></dd>
+                            </div>
+                            <div>
+                                <dt>Status</dt>
+                                <dd><span class="badge bg-success">Ativo</span></dd>
+                            </div>
+                            <div>
+                                <dt>IP atual</dt>
+                                <dd><?= h($_SERVER['REMOTE_ADDR'] ?? 'desconhecido') ?></dd>
+                            </div>
+                        </dl>
+                    </section>
+
+                    <section class="page-card" aria-labelledby="profile-edit-title">
+                        <h2 class="h4 fw-bold mb-3" id="profile-edit-title">Dados do perfil</h2>
+                        <form method="post" action="<?= h(url($basePath, 'pages/profile.php')) ?>">
+                            <input type="hidden" name="form_action" value="profile_update">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div>
-                                        <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Nome Completo</label>
-                                        <p class="form-control border-0 bg-light text-muted mb-0"><?= h($usuarioLogado['nome'] ?? current_user_name()) ?></p>
-                                    </div>
+                                    <label for="nome" class="form-label">Nome completo</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" value="<?= h($nome) ?>" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <div>
-                                        <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Email</label>
-                                        <p class="form-control border-0 bg-light text-muted mb-0"><?= h($usuarioLogado['email'] ?? 'não informado') ?></p>
-                                    </div>
+                                    <label for="username" class="form-label">Usuário</label>
+                                    <input type="text" class="form-control" id="username" value="<?= h($username) ?>" readonly aria-describedby="username-help">
+                                    <div class="form-text" id="username-help">O usuário de acesso vem da autenticação da API.</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div>
-                                        <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Função</label>
-                                        <p class="form-control border-0 bg-light text-muted mb-0">Administrador</p>
-                                    </div>
+                                    <label for="email" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<?= h($email) ?>" placeholder="nome@hospital.com">
                                 </div>
                                 <div class="col-md-6">
-                                    <div>
-                                        <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Status</label>
-                                        <div class="mb-0">
-                                            <span class="badge bg-success">Ativo</span>
-                                        </div>
-                                    </div>
+                                    <label for="telefone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="telefone" name="telefone" value="<?= h($telefone) ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cargo" class="form-label">Função</label>
+                                    <input type="text" class="form-control" id="cargo" name="cargo" value="<?= h($cargo) ?>">
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                            <div class="mt-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-success"><i class="bi bi-check2-circle" aria-hidden="true"></i>Salvar perfil</button>
+                                <a href="<?= h(url($basePath, 'pages/dashboard.php')) ?>" class="btn btn-secondary">Voltar</a>
+                            </div>
+                        </form>
+                    </section>
                 </div>
 
-                <div class="page-card mb-3">
-                    <h6 class="fw-bold mb-4 text-uppercase text-muted" style="font-size: 0.8rem; letter-spacing: 0.08em;">Segurança</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Última autenticação</label>
-                            <p class="form-control border-0 bg-light text-muted mb-0">Sessão ativa</p>
+                <section class="page-card mt-3" aria-labelledby="password-title">
+                    <h2 class="h4 fw-bold mb-3" id="password-title">Alterar senha</h2>
+                    <p class="text-muted">A validação é feita nesta tela. Para persistir a troca, conecte o formulário ao endpoint de senha quando ele existir na API Java.</p>
+                    <form method="post" action="<?= h(url($basePath, 'pages/profile.php')) ?>">
+                        <input type="hidden" name="form_action" value="password_update">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">Nova senha</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password" minlength="8" autocomplete="new-password">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">Confirmar nova senha</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="8" autocomplete="new-password">
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-uppercase mb-2" style="font-size: 0.75rem; letter-spacing: 0.08em; color: var(--hms-text-soft);">Endereço IP</label>
-                            <p class="form-control border-0 bg-light text-muted mb-0"><?= h($_SERVER['REMOTE_ADDR'] ?? 'desconhecido') ?></p>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-key" aria-hidden="true"></i>Validar alteração</button>
                         </div>
-                    </div>
-                </div>
-
-                <div class="page-card">
-                    <h6 class="fw-bold mb-4 text-uppercase text-muted" style="font-size: 0.8rem; letter-spacing: 0.08em;">Ações</h6>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary" disabled><i class="bi bi-pencil me-2"></i>Editar Perfil</button>
-                        <button type="button" class="btn btn-outline-primary" disabled><i class="bi bi-key me-2"></i>Alterar Senha</button>
-                    </div>
-                </div>
+                    </form>
+                </section>
             </main>
         </div>
     </div>
