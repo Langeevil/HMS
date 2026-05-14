@@ -104,7 +104,7 @@ render_head('HMS - Leitos', $basePath, true);
                 <div class="page-toolbar">
                     <div>
                         <h1 class="h2 fw-bold mb-1">Leitos</h1>
-                        <p class="text-muted mb-0">Monitoramento administrativo com acabamento mais contemporâneo.</p>
+                        <p class="text-muted mb-0">Veja status, quarto e ações de ocupar ou liberar.</p>
                     </div>
                     <div class="toolbar-actions"><a href="<?= h(url($basePath, 'pages/leitos/form.php')) ?>" class="btn btn-primary">Novo leito</a><?php render_user_menu($usuarioLogado['nome'] ?? 'Usuário', url($basePath, 'pages/logout.php')); ?></div>
                 </div>
@@ -119,7 +119,6 @@ render_head('HMS - Leitos', $basePath, true);
                         <thead>
                             <tr>
                                 <th scope="col">Código</th>
-                                <th scope="col">Número</th>
                                 <th scope="col">Quarto</th>
                                 <th scope="col">Ala</th>
                                 <th scope="col">Status</th>
@@ -127,7 +126,7 @@ render_head('HMS - Leitos', $basePath, true);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($leitos === []): ?><?php empty_table_row(6, 'Nenhum leito carregado. Conecte esta tela ao retorno da API Java.'); ?><?php else: foreach ($leitos as $leito): ?>
+                            <?php if ($leitos === []): ?><?php empty_table_row(5, 'Nenhum leito carregado.'); ?><?php else: foreach ($leitos as $leito): ?>
                             <?php
                                 $status = strtolower((string) ($leito['status'] ?? 'livre'));
                                 $statusClass = $statusBadgeClasses[$status] ?? 'bg-secondary';
@@ -135,7 +134,6 @@ render_head('HMS - Leitos', $basePath, true);
                             ?>
                             <tr>
                                 <td><?= h($leito['codleito'] ?? '-') ?></td>
-                                <td><?= h($leito['numero'] ?? '-') ?></td>
                                 <td><?= h($leito['quarto']['numero'] ?? ($leito['codquarto'] ?? '-')) ?></td>
                                 <td><?= h($leito['quarto']['ala']['nome'] ?? ($leito['codala'] ?? '-')) ?></td>
                                 <td><span class="badge <?= h($statusClass) ?>"><?= h($statusLabel) ?></span></td>
@@ -185,10 +183,6 @@ render_head('HMS - Leitos', $basePath, true);
                         <input type="hidden" name="form_action" value="edit_leito">
                         <input type="hidden" name="codleito" id="edit-leito-codigo">
                         <div class="mb-3">
-                            <label for="edit-leito-numero" class="form-label">Número do leito</label>
-                            <input type="number" class="form-control" name="numero" id="edit-leito-numero" required>
-                        </div>
-                        <div class="mb-3">
                             <label for="edit-leito-status" class="form-label">Status</label>
                             <select class="form-select" name="status" id="edit-leito-status" required>
                                 <option value="livre">Livre</option>
@@ -219,7 +213,6 @@ render_head('HMS - Leitos', $basePath, true);
             button.addEventListener('click', function() {
                 const record = JSON.parse(button.dataset.record || '{}');
                 document.getElementById('edit-leito-codigo').value = record.codleito || '';
-                document.getElementById('edit-leito-numero').value = record.numero || '';
                 document.getElementById('edit-leito-status').value = ['livre', 'manutencao'].includes(record.status) ? record.status : 'livre';
                 document.getElementById('edit-leito-codquarto').value = record.codquarto || record.quarto?.codquarto || '';
             });

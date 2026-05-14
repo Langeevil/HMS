@@ -6,4 +6,6 @@ require_once __DIR__ . '/../../includes/app.php';
 
 require_authentication(url($basePath, 'pages/login.php'));
 
-render_resource_form_page('alas', $basePath, 'alas', 'Nova ala', 'Informe nome e andar da ala.');
+set_flash('success', 'Cadastre medicamentos e posologia pela receita selecionada.');
+header('Location: ' . url($basePath, 'pages/receitas/listar.php'));
+exit;

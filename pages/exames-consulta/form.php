@@ -6,4 +6,6 @@ require_once __DIR__ . '/../../includes/app.php';
 
 require_authentication(url($basePath, 'pages/login.php'));
 
-render_resource_form_page('alas', $basePath, 'alas', 'Nova ala', 'Informe nome e andar da ala.');
+set_flash('success', 'Cadastre exames e resultados pela consulta selecionada.');
+header('Location: ' . url($basePath, 'pages/consultas/listar.php'));
+exit;

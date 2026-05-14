@@ -51,7 +51,7 @@ render_head('HMS - Configurações', $basePath, true);
                 <header class="top-header">
                     <div>
                         <h1 class="h2 fw-bold mb-1">Configurações</h1>
-                        <p class="mb-0 text-muted">Personalize preferências locais do painel administrativo.</p>
+                        <p class="mb-0 text-muted">Ajuste tema, notificações, privacidade e preferências do painel.</p>
                     </div>
 <?php render_user_menu(current_user_name(), url($basePath, 'pages/logout.php')); ?>
                 </header>

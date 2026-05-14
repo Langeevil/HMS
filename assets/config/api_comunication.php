@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $apiBaseUrl = 'http://localhost:8081';
+
 $authConfig = [
     'login' => [
         'attempts' => [
@@ -22,39 +23,22 @@ $entityConfigs = [
         'singular' => 'Ala',
         'endpoint' => '/api/alas',
         'primary_keys' => ['codala'],
-        'summary' => 'Setores e andares do hospital.',
+        'summary' => 'Alas usadas para organizar quartos e leitos.',
         'fields' => [
-            ['name' => 'nome', 'label' => 'Nome da Ala', 'type' => 'text', 'required' => true],
+            ['name' => 'nome', 'label' => 'Nome da ala', 'type' => 'text', 'required' => true],
             ['name' => 'andar', 'label' => 'Andar', 'type' => 'number', 'required' => false],
         ],
         'columns' => [
-            ['label' => 'Código', 'path' => 'codala'],
             ['label' => 'Nome', 'path' => 'nome'],
             ['label' => 'Andar', 'path' => 'andar'],
         ],
     ],
-    'especialidades' => [
-        'label' => 'Especialidades',
-        'singular' => 'Especialidade',
-        'endpoint' => '/api/especialidades',
-        'primary_keys' => ['codespecialidade'],
-        'summary' => 'Especialidades medicas.',
-        'fields' => [
-            ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
-            ['name' => 'descricao', 'label' => 'Descrição', 'type' => 'text', 'required' => false],
-        ],
-        'columns' => [
-            ['label' => 'Código', 'path' => 'codespecialidade'],
-            ['label' => 'Nome', 'path' => 'nome'],
-            ['label' => 'Descrição', 'path' => 'descricao'],
-        ],
-    ],
     'tipos-sanguineos' => [
-        'label' => 'Tipos Sanguineos',
-        'singular' => 'Tipo Sanguineo',
+        'label' => 'Tipos sanguíneos',
+        'singular' => 'Tipo sanguíneo',
         'endpoint' => '/api/tipos-sanguineos',
         'primary_keys' => ['codtipo'],
-        'summary' => 'Tipos sanguineos dos pacientes.',
+        'summary' => 'Tipos sanguíneos usados no cadastro de pacientes.',
         'fields' => [
             ['name' => 'tipo', 'label' => 'Tipo', 'type' => 'text', 'required' => true],
             ['name' => 'fatorrh', 'label' => 'Fator RH', 'type' => 'text', 'required' => true],
@@ -65,16 +49,57 @@ $entityConfigs = [
             ['label' => 'Fator RH', 'path' => 'fatorrh'],
         ],
     ],
+    'pacientes' => [
+        'label' => 'Pacientes',
+        'singular' => 'Paciente',
+        'endpoint' => '/api/pacientes',
+        'primary_keys' => ['codpaciente'],
+        'summary' => 'Pacientes e dados básicos do prontuário.',
+        'fields' => [
+            ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
+            ['name' => 'datanasc', 'label' => 'Data de nascimento', 'type' => 'date', 'required' => true],
+            [
+                'name' => 'codtipodk',
+                'label' => 'Tipo sanguíneo',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'tipos-sanguineos',
+                'option_value' => 'codtipo',
+                'option_label_fields' => ['tipo', 'fatorrh'],
+            ],
+        ],
+        'columns' => [
+            ['label' => 'Código', 'path' => 'codpaciente'],
+            ['label' => 'Nome', 'path' => 'nome'],
+            ['label' => 'Nascimento', 'path' => 'datanasc'],
+            ['label' => 'Tipo sanguíneo', 'path' => 'tipoSanguineo.tipo', 'fallback_paths' => ['codtipodk']],
+        ],
+    ],
+    'especialidades' => [
+        'label' => 'Especialidades',
+        'singular' => 'Especialidade',
+        'endpoint' => '/api/especialidades',
+        'primary_keys' => ['codespecialidade'],
+        'summary' => 'Especialidades usadas no cadastro de médicos.',
+        'fields' => [
+            ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
+            ['name' => 'descricao', 'label' => 'Descrição', 'type' => 'textarea', 'required' => false],
+        ],
+        'columns' => [
+            ['label' => 'Código', 'path' => 'codespecialidade'],
+            ['label' => 'Nome', 'path' => 'nome'],
+            ['label' => 'Descrição', 'path' => 'descricao'],
+        ],
+    ],
     'medicos' => [
         'label' => 'Médicos',
         'singular' => 'Médico',
         'endpoint' => '/api/medicos',
         'primary_keys' => ['codmedico'],
-        'summary' => 'Cadastro de médicos e especialidades.',
+        'summary' => 'Médicos vinculados às especialidades.',
         'fields' => [
             ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
             ['name' => 'crm', 'label' => 'CRM', 'type' => 'text', 'required' => true],
-            ['name' => 'telefone', 'label' => 'Telefone', 'type' => 'text', 'required' => false],
             [
                 'name' => 'codespecialidade',
                 'label' => 'Especialidade',
@@ -89,37 +114,7 @@ $entityConfigs = [
             ['label' => 'Código', 'path' => 'codmedico'],
             ['label' => 'Nome', 'path' => 'nome'],
             ['label' => 'CRM', 'path' => 'crm'],
-            ['label' => 'Telefone', 'path' => 'telefone'],
-            ['label' => 'Especialidade', 'path' => 'especialidade.nome'],
-        ],
-    ],
-    'pacientes' => [
-        'label' => 'Pacientes',
-        'singular' => 'Paciente',
-        'endpoint' => '/api/pacientes',
-        'primary_keys' => ['codpaciente'],
-        'summary' => 'Cadastro de pacientes e tipo sanguíneo.',
-        'fields' => [
-            ['name' => 'nome', 'label' => 'Nome', 'type' => 'text', 'required' => true],
-            ['name' => 'cpf', 'label' => 'CPF', 'type' => 'text', 'required' => true],
-            ['name' => 'dataNascimento', 'label' => 'Data de Nascimento', 'type' => 'date', 'required' => true],
-            [
-                'name' => 'codtipo',
-                'label' => 'Tipo Sanguineo',
-                'type' => 'select',
-                'required' => true,
-                'options_resource' => 'tipos-sanguineos',
-                'option_value' => 'codtipo',
-                'option_label' => 'tipo',
-            ],
-        ],
-        'columns' => [
-            ['label' => 'Código', 'path' => 'codpaciente'],
-            ['label' => 'Nome', 'path' => 'nome'],
-            ['label' => 'CPF', 'path' => 'cpf'],
-            ['label' => 'Nascimento', 'path' => 'dataNascimento'],
-            ['label' => 'Tipo Sanguineo', 'path' => 'tipoSanguineo.tipo'],
-            ['label' => 'Fator RH', 'path' => 'tipoSanguineo.fatorrh'],
+            ['label' => 'Especialidade', 'path' => 'especialidade.nome', 'fallback_paths' => ['codespecialidade']],
         ],
     ],
     'quartos' => [
@@ -127,10 +122,20 @@ $entityConfigs = [
         'singular' => 'Quarto',
         'endpoint' => '/api/quartos',
         'primary_keys' => ['codquarto'],
-        'summary' => 'Quartos vinculados a alas.',
+        'summary' => 'Quartos vinculados às alas.',
         'fields' => [
             ['name' => 'numero', 'label' => 'Número', 'type' => 'number', 'required' => true],
-            ['name' => 'tipo', 'label' => 'Tipo', 'type' => 'text', 'required' => false],
+            [
+                'name' => 'tipo',
+                'label' => 'Tipo',
+                'type' => 'select',
+                'required' => true,
+                'options' => [
+                    ['value' => 'privativo', 'label' => 'Privativo (1 leito)'],
+                    ['value' => 'semiprivativo', 'label' => 'Semiprivativo (2 leitos)'],
+                    ['value' => 'enfermaria', 'label' => 'Enfermaria (6 leitos)'],
+                ],
+            ],
             [
                 'name' => 'codala',
                 'label' => 'Ala',
@@ -145,7 +150,7 @@ $entityConfigs = [
             ['label' => 'Código', 'path' => 'codquarto'],
             ['label' => 'Número', 'path' => 'numero'],
             ['label' => 'Tipo', 'path' => 'tipo'],
-            ['label' => 'Ala', 'path' => 'ala.nome'],
+            ['label' => 'Ala', 'path' => 'ala.nome', 'fallback_paths' => ['codala']],
         ],
     ],
     'leitos' => [
@@ -154,10 +159,18 @@ $entityConfigs = [
         'endpoint' => '/api/leitos',
         'available_endpoint' => '/api/leitos/disponiveis',
         'primary_keys' => ['codleito'],
-        'summary' => 'Leitos vinculados a quartos.',
+        'summary' => 'Leitos vinculados aos quartos.',
         'fields' => [
-            ['name' => 'numero', 'label' => 'Número', 'type' => 'number', 'required' => true],
-            ['name' => 'status', 'label' => 'Status', 'type' => 'text', 'required' => true],
+            [
+                'name' => 'status',
+                'label' => 'Status',
+                'type' => 'select',
+                'required' => true,
+                'options' => [
+                    ['value' => 'livre', 'label' => 'Livre'],
+                    ['value' => 'manutencao', 'label' => 'Manutenção'],
+                ],
+            ],
             [
                 'name' => 'codquarto',
                 'label' => 'Quarto',
@@ -165,15 +178,150 @@ $entityConfigs = [
                 'required' => true,
                 'options_resource' => 'quartos',
                 'option_value' => 'codquarto',
-                'option_label' => 'numero',
+                'option_label_fields' => ['numero', 'tipo'],
             ],
         ],
         'columns' => [
             ['label' => 'Código', 'path' => 'codleito'],
-            ['label' => 'Número', 'path' => 'numero'],
-            ['label' => 'Status', 'path' => 'status'],
-            ['label' => 'Quarto', 'path' => 'quarto.numero'],
+            ['label' => 'Quarto', 'path' => 'quarto.numero', 'fallback_paths' => ['codquarto']],
             ['label' => 'Ala', 'path' => 'quarto.ala.nome'],
+            ['label' => 'Status', 'path' => 'status'],
+        ],
+    ],
+    'consultas' => [
+        'label' => 'Consultas',
+        'singular' => 'Consulta',
+        'endpoint' => '/api/consultas',
+        'primary_keys' => ['codconsulta'],
+        'summary' => 'Consultas vinculadas a pacientes e médicos.',
+        'fields' => [
+            ['name' => 'datahora', 'label' => 'Data e hora', 'type' => 'datetime-local', 'required' => true],
+            ['name' => 'motivo', 'label' => 'Motivo', 'type' => 'textarea', 'required' => true],
+            [
+                'name' => 'codpacientefk',
+                'label' => 'Paciente',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'pacientes',
+                'option_value' => 'codpaciente',
+                'option_label' => 'nome',
+            ],
+            [
+                'name' => 'codmedicofk',
+                'label' => 'Médico',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'medicos',
+                'option_value' => 'codmedico',
+                'option_label_fields' => ['nome', 'crm'],
+            ],
+        ],
+        'columns' => [
+            ['label' => 'Código', 'path' => 'codconsulta'],
+            ['label' => 'Data e hora', 'path' => 'datahora'],
+            ['label' => 'Motivo', 'path' => 'motivo'],
+            ['label' => 'Paciente', 'path' => 'paciente.nome', 'fallback_paths' => ['codpacientefk']],
+            ['label' => 'Médico', 'path' => 'medico.nome', 'fallback_paths' => ['codmedicofk']],
+        ],
+    ],
+    'receitas' => [
+        'label' => 'Receitas',
+        'singular' => 'Receita',
+        'endpoint' => '/api/receitas',
+        'primary_keys' => ['codreceita'],
+        'summary' => 'Receitas emitidas a partir de consultas.',
+        'fields' => [
+            ['name' => 'validade', 'label' => 'Validade', 'type' => 'date', 'required' => true],
+            [
+                'name' => 'codconsultafk',
+                'label' => 'Consulta',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'consultas',
+                'option_value' => 'codconsulta',
+                'option_label_fields' => ['codconsulta', 'datahora'],
+            ],
+        ],
+        'columns' => [
+            ['label' => 'Código', 'path' => 'codreceita'],
+            ['label' => 'Validade', 'path' => 'validade'],
+            ['label' => 'Consulta', 'path' => 'consulta.codconsulta', 'fallback_paths' => ['codconsultafk']],
+        ],
+    ],
+    'medicamentos' => [
+        'label' => 'Medicamentos',
+        'singular' => 'Medicamento',
+        'endpoint' => '/api/medicamentos',
+        'primary_keys' => ['codmedicamento'],
+        'summary' => 'Medicamentos usados em receitas.',
+        'fields' => [
+            ['name' => 'nomegenerico', 'label' => 'Nome genérico', 'type' => 'text', 'required' => true],
+            ['name' => 'laboratorio', 'label' => 'Laboratório', 'type' => 'text', 'required' => true],
+        ],
+        'columns' => [
+            ['label' => 'Código', 'path' => 'codmedicamento'],
+            ['label' => 'Nome genérico', 'path' => 'nomegenerico'],
+            ['label' => 'Laboratório', 'path' => 'laboratorio'],
+        ],
+    ],
+    'exames-consulta' => [
+        'label' => 'Exames da consulta',
+        'singular' => 'Exame da consulta',
+        'endpoint' => '/api/exames-consulta',
+        'primary_keys' => ['codconsultafk', 'codexamefk'],
+        'summary' => 'Resultados de exames vinculados a consultas.',
+        'fields' => [
+            [
+                'name' => 'codconsultafk',
+                'label' => 'Consulta',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'consultas',
+                'option_value' => 'codconsulta',
+                'option_label_fields' => ['codconsulta', 'datahora'],
+            ],
+            ['name' => 'codexamefk', 'label' => 'Código do exame', 'type' => 'number', 'required' => true],
+            ['name' => 'resultadourl', 'label' => 'URL do resultado', 'type' => 'url', 'required' => false],
+            ['name' => 'datarealizacao', 'label' => 'Data de realização', 'type' => 'date', 'required' => true],
+        ],
+        'columns' => [
+            ['label' => 'Consulta', 'path' => 'consulta.codconsulta', 'fallback_paths' => ['codconsultafk']],
+            ['label' => 'Exame', 'path' => 'exame.codexame', 'fallback_paths' => ['codexamefk']],
+            ['label' => 'Resultado', 'path' => 'resultadourl'],
+            ['label' => 'Realização', 'path' => 'datarealizacao'],
+        ],
+    ],
+    'itens-receita' => [
+        'label' => 'Itens da receita',
+        'singular' => 'Item da receita',
+        'endpoint' => '/api/itens-receita',
+        'primary_keys' => ['codreceitafk', 'codmedicamentofk'],
+        'summary' => 'Medicamentos e posologia de cada receita.',
+        'fields' => [
+            [
+                'name' => 'codreceitafk',
+                'label' => 'Receita',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'receitas',
+                'option_value' => 'codreceita',
+                'option_label_fields' => ['codreceita', 'validade'],
+            ],
+            [
+                'name' => 'codmedicamentofk',
+                'label' => 'Medicamento',
+                'type' => 'select',
+                'required' => true,
+                'options_resource' => 'medicamentos',
+                'option_value' => 'codmedicamento',
+                'option_label_fields' => ['nomegenerico', 'laboratorio'],
+            ],
+            ['name' => 'posologia', 'label' => 'Posologia', 'type' => 'textarea', 'required' => true],
+        ],
+        'columns' => [
+            ['label' => 'Receita', 'path' => 'receita.codreceita', 'fallback_paths' => ['codreceitafk']],
+            ['label' => 'Medicamento', 'path' => 'medicamento.nomegenerico', 'fallback_paths' => ['codmedicamentofk']],
+            ['label' => 'Posologia', 'path' => 'posologia'],
         ],
     ],
 ];
@@ -196,7 +344,6 @@ function apiBuildHeaders(array $options = []): array
 {
     $contentType = $options['content_type'] ?? 'application/json';
     $accept = $options['accept'] ?? 'application/json';
-
     $headers = ['Accept: ' . $accept];
 
     if ($contentType !== '') {
@@ -218,7 +365,6 @@ function apiEncodePayload(?array $payload, string $contentType): ?string
 
     return match ($contentType) {
         'application/x-www-form-urlencoded' => http_build_query($payload),
-        'application/json' => json_encode($payload, JSON_UNESCAPED_UNICODE),
         default => json_encode($payload, JSON_UNESCAPED_UNICODE),
     };
 }
@@ -237,7 +383,6 @@ function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlE
 
     $decoded = json_decode($rawBody, true);
     $data = json_last_error() === JSON_ERROR_NONE ? $decoded : $rawBody;
-
     $errorMessage = null;
 
     if ($httpCode >= 400) {
@@ -271,8 +416,7 @@ function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlE
 
 function apiGetHeaderValue(array $headers, string $name): string|array|null
 {
-    $normalized = strtolower($name);
-    return $headers[$normalized] ?? null;
+    return $headers[strtolower($name)] ?? null;
 }
 
 function apiRequest(string $method, string $endpoint, ?array $payload = null, array $options = []): array
@@ -308,7 +452,6 @@ function apiRequest(string $method, string $endpoint, ?array $payload = null, ar
                 if (!is_array($responseHeaders[$normalizedName])) {
                     $responseHeaders[$normalizedName] = [$responseHeaders[$normalizedName]];
                 }
-
                 $responseHeaders[$normalizedName][] = $normalizedValue;
             } else {
                 $responseHeaders[$normalizedName] = $normalizedValue;
@@ -326,7 +469,6 @@ function apiRequest(string $method, string $endpoint, ?array $payload = null, ar
     $rawBody = curl_exec($ch);
     $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
-
     curl_close($ch);
 
     return apiNormalizeResponse($rawBody, $httpCode, $curlError, $responseHeaders);
@@ -346,7 +488,6 @@ function authenticateUser(string $username, string $password): array
     foreach ($authConfig['login']['attempts'] as $attempt) {
         $query = !empty($attempt['send_as_query']) ? $credentials : [];
         $payload = !empty($attempt['send_as_query']) ? null : $credentials;
-
         $response = apiRequest('POST', $attempt['endpoint'], $payload, [
             'content_type' => $attempt['content_type'] ?? 'application/json',
             'accept' => $attempt['accept'] ?? 'application/json',
@@ -365,9 +506,7 @@ function authenticateUser(string $username, string $password): array
             if ($redirectSuccess && !is_array($response['data'])) {
                 $response['data'] = [
                     'authenticated' => true,
-                    'user' => [
-                        'username' => $username,
-                    ],
+                    'user' => ['username' => $username],
                 ];
             }
 
@@ -378,11 +517,7 @@ function authenticateUser(string $username, string $password): array
         }
 
         $status = (int) ($response['status'] ?? 0);
-        if (
-            $bestFailure === null
-            || $status >= 500
-            || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)
-        ) {
+        if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
             $bestFailure = [
                 'status' => $status,
                 'endpoint' => $attempt['endpoint'],
@@ -391,8 +526,7 @@ function authenticateUser(string $username, string $password): array
         }
 
         $attemptErrors[] = sprintf(
-            '%s %s -> HTTP %d%s',
-            'POST',
+            'POST %s -> HTTP %d%s',
             $attempt['endpoint'],
             (int) ($response['status'] ?? 0),
             !empty($response['error']) ? ' (' . $response['error'] . ')' : ''
@@ -431,25 +565,43 @@ function getNestedValue(array $data, string $path, mixed $default = null): mixed
     return $value;
 }
 
-function setNestedValue(array &$target, string $path, mixed $value): void
+function resourceEndpoint(string $resourceKey, int|string|array|null $id = null): string
 {
-    $segments = explode('.', $path);
-    $current = &$target;
+    global $entityConfigs;
 
-    foreach ($segments as $index => $segment) {
-        $last = $index === array_key_last($segments);
-
-        if ($last) {
-            $current[$segment] = $value;
-            return;
-        }
-
-        if (!isset($current[$segment]) || !is_array($current[$segment])) {
-            $current[$segment] = [];
-        }
-
-        $current = &$current[$segment];
+    $endpoint = $entityConfigs[$resourceKey]['endpoint'];
+    if ($id === null || $id === '') {
+        return $endpoint;
     }
+
+    $segments = is_array($id) ? $id : [$id];
+    foreach ($segments as $segment) {
+        $endpoint .= '/' . rawurlencode((string) $segment);
+    }
+
+    return $endpoint;
+}
+
+function resourceIdFromData(string $resourceKey, array $data): string|array|null
+{
+    global $entityConfigs;
+
+    $keys = $entityConfigs[$resourceKey]['primary_keys'] ?? [];
+    $values = [];
+
+    foreach ($keys as $key) {
+        $value = $data[$key] ?? getNestedValue($data, $key);
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $values[] = $value;
+    }
+
+    if ($values === []) {
+        return null;
+    }
+
+    return count($values) === 1 ? (string) $values[0] : $values;
 }
 
 function buildPayloadFromForm(string $resourceKey, array $formData): array
@@ -459,14 +611,6 @@ function buildPayloadFromForm(string $resourceKey, array $formData): array
     $config = $entityConfigs[$resourceKey];
     $payload = [];
 
-    foreach ($config['primary_keys'] as $primaryKey) {
-        if (isset($formData[$primaryKey]) && $formData[$primaryKey] !== '') {
-            $payload[$primaryKey] = is_numeric($formData[$primaryKey])
-                ? (int) $formData[$primaryKey]
-                : $formData[$primaryKey];
-        }
-    }
-
     foreach ($config['fields'] as $field) {
         $fieldName = $field['name'];
         $rawValue = $formData[$fieldName] ?? null;
@@ -475,9 +619,14 @@ function buildPayloadFromForm(string $resourceKey, array $formData): array
             continue;
         }
 
-        $value = is_numeric($rawValue) && !in_array($field['type'], ['text', 'email', 'date'], true)
+        $type = $field['type'] ?? 'text';
+        $value = is_numeric($rawValue) && !in_array($type, ['text', 'textarea', 'email', 'date', 'datetime-local', 'url'], true)
             ? $rawValue + 0
-            : $rawValue;
+            : trim((string) $rawValue);
+
+        if ($type === 'datetime-local' && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', (string) $value) === 1) {
+            $value .= ':00';
+        }
 
         $payload[$fieldName] = $value;
     }
@@ -506,51 +655,43 @@ function fetchAvailableLeitos(): array
     return apiRequest('GET', $entityConfigs['leitos']['available_endpoint']);
 }
 
-function fetchResourceById(string $resourceKey, int|string $id): array
+function fetchResourceById(string $resourceKey, int|string|array $id): array
 {
-    global $entityConfigs;
-
-    return apiRequest('GET', $entityConfigs[$resourceKey]['endpoint'] . '/' . $id);
+    return apiRequest('GET', resourceEndpoint($resourceKey, $id));
 }
 
 function saveResource(string $resourceKey, array $formData): array
 {
-    global $entityConfigs;
-
     $payload = buildPayloadFromForm($resourceKey, $formData);
 
-    return apiRequest('POST', $entityConfigs[$resourceKey]['endpoint'], $payload);
+    return apiRequest('POST', resourceEndpoint($resourceKey), $payload);
 }
 
-function updateResource(string $resourceKey, int|string $id, array $formData): array
+function updateResource(string $resourceKey, int|string|array $id, array $formData): array
 {
     global $entityConfigs;
 
     $payload = buildPayloadFromForm($resourceKey, $formData);
-    foreach ($entityConfigs[$resourceKey]['primary_keys'] as $primaryKey) {
-        unset($payload[$primaryKey]);
+    $primaryKeys = $entityConfigs[$resourceKey]['primary_keys'] ?? [];
+
+    if (count($primaryKeys) === 1) {
+        unset($payload[$primaryKeys[0]]);
     }
 
-    return apiRequest('PUT', $entityConfigs[$resourceKey]['endpoint'] . '/' . $id, $payload);
+    return apiRequest('PUT', resourceEndpoint($resourceKey, $id), $payload);
 }
 
-function deleteResource(string $resourceKey, int|string $id): array
+function deleteResource(string $resourceKey, int|string|array $id): array
 {
-    global $entityConfigs;
-
-    return apiRequest('DELETE', $entityConfigs[$resourceKey]['endpoint'] . '/' . $id);
+    return apiRequest('DELETE', resourceEndpoint($resourceKey, $id));
 }
 
 function occupyLeito(int|string $id): array
 {
-    global $entityConfigs;
-
-    return apiRequest('PATCH', $entityConfigs['leitos']['endpoint'] . '/' . $id . '/ocupar');
+    return apiRequest('PATCH', resourceEndpoint('leitos', $id) . '/ocupar');
 }
 
 function releaseLeito(int|string $id): array
 {
-    global $entityConfigs;
-
-    return apiRequest('PATCH', $entityConfigs['leitos']['endpoint'] . '/' . $id . '/liberar');
+    return apiRequest('PATCH', resourceEndpoint('leitos', $id) . '/liberar');
 }

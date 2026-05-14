@@ -71,7 +71,7 @@ render_head('HMS - Perfil do Usuário', $basePath, true);
                 <header class="top-header">
                     <div>
                         <h1 class="h2 fw-bold mb-1">Meu perfil</h1>
-                        <p class="mb-0 text-muted">Visualize e atualize as informações usadas no painel administrativo.</p>
+                        <p class="mb-0 text-muted">Atualize seus dados de usuário e revise informações da conta.</p>
                     </div>
 <?php render_user_menu(current_user_name(), url($basePath, 'pages/logout.php')); ?>
                 </header>
