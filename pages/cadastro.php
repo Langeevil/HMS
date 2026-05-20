@@ -12,7 +12,7 @@ render_head('HMS - Cadastro', $basePath);
     <main class="auth-shell">
         <section class="auth-highlight d-flex flex-column justify-content-between">
             <div>
-                <img src="<?= h(url($basePath, 'assets/images/logo.png')) ?>" alt="Logo HMS" class="brand-logo-image">
+                <img src="<?= h(url($basePath, 'assets/images/HMS.png')) ?>" alt="Logo HMS" class="brand-logo-image">
                 <h1 class="display-5 fw-bold mt-4 mb-3">Cadastre o acesso administrativo inicial.</h1>
                 <p class="mb-0 text-white-50 fs-5">Crie a conta inicial para começar a usar o painel administrativo.</p>
             </div>

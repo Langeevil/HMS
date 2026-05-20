@@ -56,7 +56,7 @@ render_head('HMS - Login', $basePath);
     <main class="auth-shell">
         <section class="auth-highlight d-flex flex-column justify-content-between">
             <div>
-                <img src="<?= h(url($basePath, 'assets/images/logo.png')) ?>" alt="Logo HMS" class="brand-logo-image">
+                <img src="<?= h(url($basePath, 'assets/images/HMS.png')) ?>" alt="Logo HMS" class="brand-logo-image">
                 <h1 class="display-5 fw-bold mt-4 mb-3">Acesso ao centro de gestão hospitalar.</h1>
                 <p class="mb-0 text-white-50 fs-5">Acesse pacientes, médicos, quartos, leitos e demais cadastros do hospital.</p>
             </div>

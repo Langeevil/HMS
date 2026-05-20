@@ -114,7 +114,7 @@ function render_admin_sidebar(string $basePath, string $active): void
     ?>
             <nav class="col-lg-3 col-xl-2 sidebar" aria-label="Navegação administrativa">
                 <div class="sidebar-header">
-                    <img src="<?= h(url($basePath, 'assets/images/logo.png')) ?>" alt="Logo HMS" class="brand-logo-image">
+                    <img src="<?= h(url($basePath, 'assets/images/HMS.png')) ?>" alt="Logo HMS" class="brand-logo-image">
                     <div class="sidebar-brand-copy">
                         <span class="fw-bold fs-5">HMS Admin</span>
                         <small>Painel hospitalar</small>

@@ -11,7 +11,7 @@ render_head('Hospital Management System - HMS', $basePath);
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#inicio">
-                <img src="<?= h(url($basePath, 'assets/images/logo.png')) ?>" alt="Logo HMS" class="brand-logo-image">
+                <img src="<?= h(url($basePath, 'assets/images/HMS.png')) ?>" alt="Logo HMS" class="brand-logo-image">
                 <span>
                     <span class="d-block">HMS</span>
                     <small class="d-block text-white-50 fw-normal">Hospital Management System</small>
