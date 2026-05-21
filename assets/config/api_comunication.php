@@ -15,6 +15,16 @@ $authConfig = [
             ],
         ],
     ],
+    'register' => [
+        // Ajuste este endpoint se a API HMS expuser o cadastro em outra rota.
+        'attempts' => [
+            [
+                'endpoint' => '/api/usuarios',
+                'content_type' => 'application/json',
+                'accept' => 'application/json, text/plain, */*',
+            ],
+        ],
+    ],
 ];
 
 $entityConfigs = [
@@ -544,6 +554,87 @@ function authenticateUser(string $username, string $password): array
                 !empty($bestFailure['error']) ? ' (' . $bestFailure['error'] . ')' : ''
             )
             : 'Falha ao autenticar na API.',
+        'data' => null,
+        'headers' => [],
+        'debug_attempts' => $attemptErrors,
+    ];
+}
+
+function registerUser(string $nome, string $username, string $password, ?string $endpoint = null): array
+{
+    global $authConfig;
+
+    $payload = [
+        'nome' => $nome,
+        'username' => $username,
+        'password' => $password,
+    ];
+
+    $attempts = $authConfig['register']['attempts'] ?? [];
+    if ($endpoint !== null && $endpoint !== '') {
+        $attempts = array_map(
+            static function (array $attempt) use ($endpoint): array {
+                $attempt['endpoint'] = $endpoint;
+                return $attempt;
+            },
+            $attempts
+        );
+    }
+
+    if ($attempts === []) {
+        return [
+            'success' => false,
+            'status' => 0,
+            'error' => 'Endpoint de cadastro da API HMS nao configurado.',
+            'data' => null,
+            'headers' => [],
+        ];
+    }
+
+    $attemptErrors = [];
+    $bestFailure = null;
+
+    foreach ($attempts as $attempt) {
+        $response = apiRequest('POST', (string) $attempt['endpoint'], $payload, [
+            'content_type' => $attempt['content_type'] ?? 'application/json',
+            'accept' => $attempt['accept'] ?? 'application/json',
+            'timeout' => $attempt['timeout'] ?? 10,
+        ]);
+
+        if ($response['success']) {
+            $response['auth_attempt'] = $attempt;
+            $response['debug_attempts'] = $attemptErrors;
+            return $response;
+        }
+
+        $status = (int) ($response['status'] ?? 0);
+        if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
+            $bestFailure = [
+                'status' => $status,
+                'endpoint' => $attempt['endpoint'],
+                'error' => $response['error'] ?? null,
+            ];
+        }
+
+        $attemptErrors[] = sprintf(
+            'POST %s -> HTTP %d%s',
+            $attempt['endpoint'],
+            (int) ($response['status'] ?? 0),
+            !empty($response['error']) ? ' (' . $response['error'] . ')' : ''
+        );
+    }
+
+    return [
+        'success' => false,
+        'status' => (int) ($bestFailure['status'] ?? 0),
+        'error' => $bestFailure !== null
+            ? sprintf(
+                'Falha ao cadastrar na API HMS. %s respondeu HTTP %d%s',
+                $bestFailure['endpoint'],
+                $bestFailure['status'],
+                !empty($bestFailure['error']) ? ' (' . $bestFailure['error'] . ')' : ''
+            )
+            : 'Falha ao cadastrar na API HMS.',
         'data' => null,
         'headers' => [],
         'debug_attempts' => $attemptErrors,

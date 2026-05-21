@@ -10,6 +10,7 @@ if (is_authenticated()) {
 }
 
 $erro = null;
+$success = get_flash('registration_success');
 $formAction = $formAction ?? url($basePath, 'pages/login.php');
 $username = '';
 
@@ -74,6 +75,9 @@ render_head('HMS - Login', $basePath);
                     <form action="<?= h($formAction) ?>" method="post">
 <?php if ($erro): ?>
                         <div class="alert alert-danger" role="alert"><?= h($erro) ?></div>
+<?php endif; ?>
+<?php if ($success): ?>
+                        <div class="alert alert-success" role="status"><?= h($success) ?></div>
 <?php endif; ?>
                         <div class="mb-3"><label for="username" class="form-label">Usuário</label><input type="text" name="username" value="<?= h($username) ?>" class="form-control" id="username" required></div>
                         <div class="mb-4"><label for="password" class="form-label">Senha</label><input type="password" name="password" class="form-control" id="password" required></div>

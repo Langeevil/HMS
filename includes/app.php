@@ -35,7 +35,7 @@ function url_from_page(string $page): string
     return './' . $page;
 }
 
-function render_head(string $title, string $basePath, bool $withIcons = false): void
+function render_head(string $title, string $basePath, bool $withIcons = false, array $stylesheets = []): void
 {
     ?>
 <!DOCTYPE html>
@@ -60,7 +60,45 @@ function render_head(string $title, string $basePath, bool $withIcons = false): 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <?php endif; ?>
     <link rel="stylesheet" href="<?= h(url($basePath, 'assets/css/hms-theme.css')) ?>">
+<?php foreach ($stylesheets as $stylesheet): ?>
+    <link rel="stylesheet" href="<?= h(url($basePath, (string) $stylesheet)) ?>">
+<?php endforeach; ?>
 </head>
+<?php
+}
+
+function render_footer(bool $compact = false): void
+{
+    if ($compact) {
+        ?>
+    <footer class="footer">
+        <p class="footer-copy">&copy; <?= h((string) date('Y')) ?> Gabriel da Silva Siqueira e Gabriel Leonardo Morales Lopes</p>
+        <hr class="footer-divider">
+        <p class="footer-rights">Todos os direitos reservados.</p>
+    </footer>
+<?php
+        return;
+    }
+
+    ?>
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center gy-3">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-1">HMS - Hospital Management System</h5>
+                    <p class="mb-0 text-muted">Transformando a gestao hospitalar brasileira.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="footer-link-muted me-3">Termos</span>
+                    <span class="footer-link-muted me-3">Privacidade</span>
+                    <span class="footer-link-muted">Contato</span>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; <?= h((string) date('Y')) ?> Gabriel da Silva Siqueira e Gabriel Leonardo Morales Lopes</p>
+            <hr class="footer-divider">
+            <p class="footer-rights">Todos os direitos reservados.</p>
+        </div>
+    </footer>
 <?php
 }
 
@@ -102,7 +140,7 @@ function render_admin_sidebar(string $basePath, string $active): void
         'dashboard' => ['label' => 'Dashboard', 'icon' => 'bi-grid-1x2-fill', 'path' => 'pages/dashboard.php'],
         'pacientes' => ['label' => 'Pacientes', 'icon' => 'bi-people', 'path' => 'pages/pacientes/listar.php'],
         'medicos' => ['label' => 'Médicos', 'icon' => 'bi-person-badge', 'path' => 'pages/medicos/listar.php'],
-        'consultas' => ['label' => 'Consultas', 'icon' => 'bi-calendar2-pulse', 'path' => 'pages/consultas/listar.php'],
+        'consultas' => ['label' => 'Consultas', 'icon' => 'bi-calendar-check', 'path' => 'pages/consultas/listar.php'],
         'receitas' => ['label' => 'Receitas', 'icon' => 'bi-prescription2', 'path' => 'pages/receitas/listar.php'],
         'medicamentos' => ['label' => 'Medicamentos', 'icon' => 'bi-capsule', 'path' => 'pages/medicamentos/listar.php'],
         'alas' => ['label' => 'Alas', 'icon' => 'bi-building', 'path' => 'pages/alas/listar.php'],

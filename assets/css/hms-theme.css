@@ -1517,7 +1517,10 @@ textarea.form-control {
 
     body.sidebar-collapsed .sidebar-header {
         justify-content: center;
-        padding-inline: 0.4rem;
+        padding: 0;
+        margin-bottom: 1.1rem;
+        background: transparent;
+        border-radius: 0;
     }
 
     body.sidebar-collapsed .sidebar .brand-logo-image,
@@ -1535,6 +1538,10 @@ textarea.form-control {
 
     body.sidebar-collapsed .sidebar-toggle {
         margin-left: 0;
+        width: 3rem;
+        height: 3rem;
+        min-width: 3rem;
+        border-radius: 1rem;
     }
 
     body.sidebar-collapsed .content,
@@ -1542,6 +1549,279 @@ textarea.form-control {
         flex: 1 1 auto;
         width: auto;
     }
+}
+
+/* Visual continuity with the registration screen */
+.auth-page {
+    background:
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.22), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.16), transparent 30%),
+        #070a18;
+    color: #f8fafc;
+}
+
+.auth-shell {
+    background: rgba(2, 6, 23, 0.72);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 1.75rem;
+    box-shadow: 0 1.875rem 5rem rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(1rem);
+}
+
+.auth-highlight {
+    background:
+        linear-gradient(160deg, rgba(2, 6, 23, 0.88), rgba(15, 23, 42, 0.72)),
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.35), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.2), transparent 32%),
+        url("https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1200&q=80");
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-panel {
+    background: rgba(2, 6, 23, 0.86);
+    color: #f8fafc;
+}
+
+.auth-panel .auth-back {
+    color: #a5b4fc;
+}
+
+.auth-panel .auth-back:hover,
+.auth-panel .auth-back:focus {
+    color: #c7d2fe;
+}
+
+.auth-panel h1,
+.auth-panel h2,
+.auth-panel h3,
+.auth-panel .form-label {
+    color: #f8fafc;
+}
+
+.auth-panel .text-muted {
+    color: #94a3b8 !important;
+}
+
+.auth-panel .form-control,
+.auth-panel .form-select,
+.auth-panel textarea.form-control {
+    background: rgba(15, 23, 42, 0.75);
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+.auth-panel .form-control::placeholder,
+.auth-panel textarea.form-control::placeholder {
+    color: #64748b;
+}
+
+.auth-panel .form-control:focus,
+.auth-panel .form-select:focus {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(129, 140, 248, 0.8);
+    box-shadow: 0 0 0 0.2rem rgba(129, 140, 248, 0.18);
+    color: #f8fafc;
+}
+
+.sidebar {
+    background:
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.2), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.13), transparent 34%),
+        linear-gradient(180deg, #0b1726, #102a3a 56%, #071722);
+}
+
+.page-toolbar,
+.top-header,
+.page-card,
+.metric-card,
+.stat-card {
+    border-color: rgba(99, 102, 241, 0.13);
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.04);
+}
+
+.page-toolbar,
+.top-header {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(244, 249, 251, 0.76)),
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.08), transparent 36%);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, var(--hms-primary), var(--hms-secondary));
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: linear-gradient(135deg, #4f46e5, var(--hms-primary-strong), var(--hms-primary));
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #34d399, var(--hms-accent));
+    color: #06231f;
+}
+
+/* Public landing page continuity */
+.public-page {
+    background:
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.22), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.14), transparent 30%),
+        #070a18;
+    color: #f8fafc;
+}
+
+.public-page .navbar {
+    background: rgba(2, 6, 23, 0.78) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(1rem);
+}
+
+.public-page .navbar-brand,
+.public-page .nav-link {
+    color: rgba(248, 250, 252, 0.82);
+}
+
+.public-page .nav-link:hover,
+.public-page .nav-link:focus,
+.public-page .nav-link.active {
+    color: #ffffff;
+}
+
+.public-page .hero-section {
+    min-height: calc(100svh - 4.75rem);
+    background:
+        linear-gradient(135deg, rgba(7, 10, 24, 0.92), rgba(15, 23, 42, 0.76)),
+        radial-gradient(circle at 18% 22%, rgba(99, 102, 241, 0.28), transparent 34%),
+        radial-gradient(circle at 82% 74%, rgba(16, 185, 129, 0.18), transparent 30%),
+        url("https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1600&q=80");
+    background-size: cover;
+    background-position: center;
+}
+
+.public-page .hero-section::before,
+.public-page .hero-section::after {
+    display: none;
+}
+
+.public-page .eyebrow {
+    background: rgba(99, 102, 241, 0.14);
+    border-color: rgba(165, 180, 252, 0.24);
+    color: #c7d2fe;
+}
+
+.public-page .hero-copy {
+    color: #cbd5e1;
+}
+
+.public-page .btn-light {
+    background: #34d399;
+    border-color: #34d399;
+    color: #020617;
+}
+
+.public-page .btn-light:hover,
+.public-page .btn-light:focus {
+    background: #6ee7b7;
+    border-color: #6ee7b7;
+    color: #020617;
+}
+
+.public-page .btn-outline-light {
+    border-color: rgba(199, 210, 254, 0.42);
+    color: #e0e7ff;
+}
+
+.public-page .btn-outline-light:hover,
+.public-page .btn-outline-light:focus {
+    background: rgba(199, 210, 254, 0.12);
+    border-color: rgba(199, 210, 254, 0.76);
+    color: #ffffff;
+}
+
+.public-page #sobre,
+.public-page #planos {
+    background: transparent;
+}
+
+.public-page #sobre h2,
+.public-page #planos h2,
+.public-page .plan-card h3,
+.public-page .feature-card h3 {
+    color: #f8fafc;
+}
+
+.public-page #sobre .lead,
+.public-page #planos .text-muted,
+.public-page .feature-card .text-muted,
+.public-page .plan-card .text-muted {
+    color: #a9b7cb !important;
+}
+
+.public-page .feature-card,
+.public-page .plan-card {
+    background: rgba(2, 6, 23, 0.72);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 1.25rem 3.5rem rgba(0, 0, 0, 0.28);
+    color: #f8fafc;
+    backdrop-filter: blur(1rem);
+}
+
+.public-page .feature-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.public-page .feature-card::before,
+.public-page .plan-card::before {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 0.22rem;
+    margin-bottom: 1.15rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6366f1, #34d399);
+}
+
+.public-page .feature-card .text-primary,
+.public-page .plan-card .text-primary {
+    color: #a5b4fc !important;
+}
+
+.public-page .plan-card.featured {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.82)),
+        radial-gradient(circle at top, rgba(52, 211, 153, 0.13), transparent 42%);
+    border-color: rgba(52, 211, 153, 0.32);
+    box-shadow: 0 1.5rem 4.5rem rgba(16, 185, 129, 0.14);
+}
+
+.public-page .footer {
+    background: rgba(2, 6, 23, 0.94);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-copy {
+    margin: 0;
+    padding-top: 1.25rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.95rem;
+}
+
+.footer-divider {
+    width: min(100%, 34rem);
+    margin: 0.85rem auto;
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    opacity: 1;
+}
+
+.footer-rights {
+    margin: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.92rem;
 }
 
 /* Dark theme accessibility hardening */
