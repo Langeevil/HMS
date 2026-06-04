@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($formAction === 'edit_leito') {
         if ($codleito === '') {
-            $response = ['success' => false, 'error' => 'Código do leito nao informado.'];
+            $response = ['success' => false, 'error' => 'Código do leito não informado.'];
         } elseif (($_POST['status'] ?? '') === 'ocupado') {
             $response = ['success' => false, 'error' => 'Use a ação Ocupar para alterar o status do leito para ocupado.'];
         } else {
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($formAction === 'ocupar_leito') {
         $response = $codleito !== ''
             ? occupyLeito($codleito)
-            : ['success' => false, 'error' => 'Código do leito nao informado.'];
+            : ['success' => false, 'error' => 'Código do leito não informado.'];
 
         if ($response['success']) {
             set_flash('success', 'Leito ocupado com sucesso.');
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($formAction === 'liberar_leito') {
         $response = $codleito !== ''
             ? releaseLeito($codleito)
-            : ['success' => false, 'error' => 'Código do leito nao informado.'];
+            : ['success' => false, 'error' => 'Código do leito não informado.'];
 
         if ($response['success']) {
             set_flash('success', 'Leito liberado com sucesso.');
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['delete_id'])) {
     $response = deleteResource('leitos', $_GET['delete_id']);
 
     if ($response['success']) {
-        set_flash('success', 'Leito excluido com sucesso.');
+        set_flash('success', 'Leito excluído com sucesso.');
         header('Location: ' . url($basePath, 'pages/leitos/listar.php'));
         exit;
     }

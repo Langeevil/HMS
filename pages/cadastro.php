@@ -16,18 +16,18 @@ $usuario = [
 $erro = null;
 $formAction = $formAction ?? url($basePath, 'pages/cadastro.php');
 
-// Endpoint REST de cadastro da API HMS. Ajuste aqui se a rota real for diferente.
-$registrationApiEndpoint = $registrationApiEndpoint ?? '/api/usuarios';
+// Endpoint MVC de cadastro da API HMS. A API Java atual usa POST /cadastro.
+$registrationApiEndpoint = $registrationApiEndpoint ?? '/cadastro';
 
 function cadastro_password_errors(string $password): array
 {
     $rules = [
-        [strlen($password) >= 8, 'A senha deve ter no minimo 8 caracteres.'],
-        [preg_match('/[A-Z]/', $password) === 1, 'Inclua pelo menos uma letra maiuscula.'],
-        [preg_match('/[a-z]/', $password) === 1, 'Inclua pelo menos uma letra minuscula.'],
-        [preg_match('/\d/', $password) === 1, 'Inclua pelo menos um numero.'],
+        [strlen($password) >= 8, 'A senha deve ter no mínimo 8 caracteres.'],
+        [preg_match('/[A-Z]/', $password) === 1, 'Inclua pelo menos uma letra maiúscula.'],
+        [preg_match('/[a-z]/', $password) === 1, 'Inclua pelo menos uma letra minúscula.'],
+        [preg_match('/\d/', $password) === 1, 'Inclua pelo menos um número.'],
         [preg_match('/[^A-Za-z0-9\s]/', $password) === 1, 'Inclua pelo menos um caractere especial.'],
-        [preg_match('/\s/', $password) !== 1, 'A senha nao pode conter espacos.'],
+        [preg_match('/\s/', $password) !== 1, 'A senha não pode conter espaços.'],
     ];
 
     return array_values(array_map(
@@ -44,23 +44,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     $passwordErrors = cadastro_password_errors($password);
 
     if ($usuario['nome'] === '' || $usuario['username'] === '') {
-        $erro = 'Informe nome e usuario para criar a conta.';
+        $erro = 'Informe nome e usuário para criar a conta.';
     } elseif ($password === '' || $confirmPassword === '') {
         $erro = 'Informe e confirme a senha.';
     } elseif ($passwordErrors !== []) {
-        $erro = 'A senha ainda nao atende aos requisitos: ' . implode(' ', $passwordErrors);
+        $erro = 'A senha ainda não atende aos requisitos: ' . implode(' ', $passwordErrors);
     } elseif ($password !== $confirmPassword) {
-        $erro = 'As senhas informadas nao coincidem.';
+        $erro = 'As senhas informadas não coincidem.';
     } else {
         $response = registerUser($usuario['nome'], $usuario['username'], $password, $registrationApiEndpoint);
 
         if ($response['success']) {
-            set_flash('registration_success', 'Conta criada com sucesso. Entre com o usuario cadastrado.');
+            set_flash('registration_success', 'Conta criada com sucesso. Entre com o usuário cadastrado.');
             header('Location: ' . url($basePath, 'pages/login.php'));
             exit;
         }
 
-        $erro = $response['error'] ?: 'Nao foi possivel criar a conta na API HMS.';
+        $erro = $response['error'] ?: 'Não foi possível criar a conta na API HMS.';
     }
 }
 
@@ -68,16 +68,16 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
 ?>
 <body class="signup-page">
     <main class="signup-container">
-        <section class="signup-intro" aria-label="Apresentacao do cadastro HMS">
+        <section class="signup-intro" aria-label="Apresentação do cadastro HMS">
             <div>
                 <img src="<?= h(url($basePath, 'assets/images/HMS.png')) ?>" alt="Logo HMS" class="signup-logo">
                 <div class="signup-tag">Cadastro HMS</div>
                 <h1>Crie o acesso administrativo inicial.</h1>
-                <p>Configure uma conta segura para acessar pacientes, medicos, leitos e demais rotinas administrativas do hospital.</p>
+                <p>Configure uma conta segura para acessar pacientes, médicos, leitos e demais rotinas administrativas do hospital.</p>
             </div>
             <div class="signup-note">
-                <strong>Validacao em tempo real</strong>
-                <span>A senha so sera enviada quando cumprir todos os requisitos e coincidir com a confirmacao.</span>
+                <strong>Validação em tempo real</strong>
+                <span>A senha só será enviada quando cumprir todos os requisitos e coincidir com a confirmação.</span>
             </div>
         </section>
 
@@ -108,7 +108,7 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
                 </div>
 
                 <div class="signup-field">
-                    <label for="username">Usuario</label>
+                    <label for="username">Usuário</label>
                     <div class="input-wrap">
                         <input type="text" name="username" id="username" value="<?= h($usuario['username']) ?>" placeholder="usuario.hms" class="normal-field" autocomplete="username" required>
                     </div>
@@ -133,7 +133,7 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
                     <div class="password-bubble" id="passwordBubble">
                         <div class="bubble-head">
                             <div>
-                                <div class="bubble-title" id="bubbleTitle">Forca da senha</div>
+                                <div class="bubble-title" id="bubbleTitle">Força da senha</div>
                                 <div class="bubble-sub" id="bubbleSub">0 de 6 requisitos</div>
                             </div>
                             <i class="bi bi-shield-lock" aria-hidden="true"></i>
@@ -145,19 +145,19 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
 
                         <div class="rule" id="ruleLength">
                             <span class="rule-icon">x</span>
-                            Minimo de 8 caracteres
+                            Mínimo de 8 caracteres
                         </div>
                         <div class="rule" id="ruleUpper">
                             <span class="rule-icon">x</span>
-                            Uma letra maiuscula
+                            Uma letra maiúscula
                         </div>
                         <div class="rule" id="ruleLower">
                             <span class="rule-icon">x</span>
-                            Uma letra minuscula
+                            Uma letra minúscula
                         </div>
                         <div class="rule" id="ruleNumber">
                             <span class="rule-icon">x</span>
-                            Um numero
+                            Um número
                         </div>
                         <div class="rule" id="ruleSpecial">
                             <span class="rule-icon">x</span>
@@ -165,7 +165,7 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
                         </div>
                         <div class="rule" id="ruleNoSpaces">
                             <span class="rule-icon">x</span>
-                            Sem espacos
+                            Sem espaços
                         </div>
                     </div>
                 </div>
@@ -176,14 +176,14 @@ render_head('HMS - Cadastro', $basePath, true, ['assets/css/signup.css']);
                     <label for="confirmPassword">Repetir senha</label>
                     <div class="input-wrap" id="confirmWrap">
                         <input type="password" name="confirm_password" id="confirmPassword" placeholder="Repita sua senha" autocomplete="new-password" required>
-                        <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Mostrar confirmacao de senha">Mostrar</button>
+                        <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Mostrar confirmação de senha">Mostrar</button>
                     </div>
 
                     <div class="confirm-msg" id="confirmMsg" aria-live="polite"></div>
                 </div>
 
                 <button class="signup-submit" type="submit" id="submitBtn" disabled>Criar conta</button>
-                <div class="signup-login">Ja tem uma conta? <a href="<?= h(url($basePath, 'pages/login.php')) ?>">Entrar</a></div>
+                <div class="signup-login">Já tem uma conta? <a href="<?= h(url($basePath, 'pages/login.php')) ?>">Entrar</a></div>
             </form>
         </section>
     </main>

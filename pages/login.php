@@ -40,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $apiUser = ['username' => $username];
             }
 
+            $profileResponse = fetchUserProfile((string) ($apiUser['username'] ?? $username));
+            if (($profileResponse['success'] ?? false) && is_array($profileResponse['data'] ?? null)) {
+                $apiUser = array_merge($apiUser, $profileResponse['data']);
+            }
+
             $_SESSION['auth_user'] = $apiUser;
             $_SESSION['api_session_cookie'] = $apiSessionCookie;
 

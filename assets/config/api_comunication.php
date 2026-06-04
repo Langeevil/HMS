@@ -16,12 +16,12 @@ $authConfig = [
         ],
     ],
     'register' => [
-        // Ajuste este endpoint se a API HMS expuser o cadastro em outra rota.
         'attempts' => [
             [
-                'endpoint' => '/api/usuarios',
-                'content_type' => 'application/json',
-                'accept' => 'application/json, text/plain, */*',
+                'endpoint' => '/cadastro',
+                'content_type' => 'application/x-www-form-urlencoded',
+                'accept' => 'text/html, application/xhtml+xml, application/json, text/plain, */*',
+                'success_redirect_contains' => '/login',
             ],
         ],
     ],
@@ -511,8 +511,9 @@ function authenticateUser(string $username, string $password): array
         $redirectSuccess = $location !== ''
             && !empty($attempt['success_redirect_contains'])
             && str_contains($location, (string) $attempt['success_redirect_contains']);
+        $expectsRedirect = !empty($attempt['success_redirect_contains']);
 
-        if ($response['success'] || $redirectSuccess) {
+        if ($redirectSuccess || (!$expectsRedirect && $response['success'])) {
             if ($redirectSuccess && !is_array($response['data'])) {
                 $response['data'] = [
                     'authenticated' => true,
@@ -527,11 +528,16 @@ function authenticateUser(string $username, string $password): array
         }
 
         $status = (int) ($response['status'] ?? 0);
+        $failureError = $response['error'] ?? null;
+        if ($expectsRedirect && !$redirectSuccess && $status >= 200 && $status < 300) {
+            $failureError = 'Credenciais invalidas ou login sem redirecionamento para ' . $attempt['success_redirect_contains'] . '.';
+        }
+
         if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
             $bestFailure = [
                 'status' => $status,
                 'endpoint' => $attempt['endpoint'],
-                'error' => $response['error'] ?? null,
+                'error' => $failureError,
             ];
         }
 
@@ -539,7 +545,7 @@ function authenticateUser(string $username, string $password): array
             'POST %s -> HTTP %d%s',
             $attempt['endpoint'],
             (int) ($response['status'] ?? 0),
-            !empty($response['error']) ? ' (' . $response['error'] . ')' : ''
+            !empty($failureError) ? ' (' . $failureError . ')' : ''
         );
     }
 
@@ -585,7 +591,7 @@ function registerUser(string $nome, string $username, string $password, ?string 
         return [
             'success' => false,
             'status' => 0,
-            'error' => 'Endpoint de cadastro da API HMS nao configurado.',
+            'error' => 'Endpoint de cadastro da API HMS não configurado.',
             'data' => null,
             'headers' => [],
         ];
@@ -601,18 +607,38 @@ function registerUser(string $nome, string $username, string $password, ?string 
             'timeout' => $attempt['timeout'] ?? 10,
         ]);
 
-        if ($response['success']) {
+        $locationHeader = apiGetHeaderValue($response['headers'] ?? [], 'location');
+        $location = is_array($locationHeader) ? (string) end($locationHeader) : (string) ($locationHeader ?? '');
+        $redirectSuccess = $location !== ''
+            && !empty($attempt['success_redirect_contains'])
+            && str_contains($location, (string) $attempt['success_redirect_contains']);
+        $expectsRedirect = !empty($attempt['success_redirect_contains']);
+
+        if ($redirectSuccess || (!$expectsRedirect && $response['success'])) {
+            if ($redirectSuccess && !is_array($response['data'])) {
+                $response['data'] = [
+                    'registered' => true,
+                    'user' => ['username' => $username, 'nome' => $nome],
+                ];
+            }
+
+            $response['success'] = true;
             $response['auth_attempt'] = $attempt;
             $response['debug_attempts'] = $attemptErrors;
             return $response;
         }
 
         $status = (int) ($response['status'] ?? 0);
+        $failureError = $response['error'] ?? null;
+        if ($expectsRedirect && !$redirectSuccess && $status >= 200 && $status < 300) {
+            $failureError = 'Cadastro recusado pela API ou sem redirecionamento para ' . $attempt['success_redirect_contains'] . '.';
+        }
+
         if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
             $bestFailure = [
                 'status' => $status,
                 'endpoint' => $attempt['endpoint'],
-                'error' => $response['error'] ?? null,
+                'error' => $failureError,
             ];
         }
 
@@ -620,7 +646,7 @@ function registerUser(string $nome, string $username, string $password, ?string 
             'POST %s -> HTTP %d%s',
             $attempt['endpoint'],
             (int) ($response['status'] ?? 0),
-            !empty($response['error']) ? ' (' . $response['error'] . ')' : ''
+            !empty($failureError) ? ' (' . $failureError . ')' : ''
         );
     }
 
@@ -639,6 +665,66 @@ function registerUser(string $nome, string $username, string $password, ?string 
         'headers' => [],
         'debug_attempts' => $attemptErrors,
     ];
+}
+
+function fetchUserProfile(string $username): array
+{
+    $username = trim($username);
+    if ($username === '') {
+        return [
+            'success' => false,
+            'status' => 0,
+            'error' => 'Usuário não informado.',
+            'data' => null,
+            'headers' => [],
+        ];
+    }
+
+    return apiRequest('GET', '/api/usuarios/' . rawurlencode($username), null, [
+        'accept' => 'application/json',
+        'timeout' => 5,
+    ]);
+}
+
+function updateUserPhoto(string $username, string $fotoBase64): array
+{
+    $username = trim($username);
+    if ($username === '') {
+        return [
+            'success' => false,
+            'status' => 0,
+            'error' => 'Usuário não informado.',
+            'data' => null,
+            'headers' => [],
+        ];
+    }
+
+    return apiRequest('PATCH', '/api/usuarios/' . rawurlencode($username) . '/foto', [
+        'fotoBase64' => $fotoBase64,
+    ], [
+        'content_type' => 'application/json',
+        'accept' => 'application/json',
+        'timeout' => 10,
+    ]);
+}
+
+function removeUserPhoto(string $username): array
+{
+    $username = trim($username);
+    if ($username === '') {
+        return [
+            'success' => false,
+            'status' => 0,
+            'error' => 'Usuário não informado.',
+            'data' => null,
+            'headers' => [],
+        ];
+    }
+
+    return apiRequest('DELETE', '/api/usuarios/' . rawurlencode($username) . '/foto', null, [
+        'accept' => 'application/json',
+        'timeout' => 10,
+    ]);
 }
 
 function getNestedValue(array $data, string $path, mixed $default = null): mixed

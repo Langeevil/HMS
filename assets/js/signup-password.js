@@ -61,7 +61,7 @@
             const icon = element.querySelector('.rule-icon');
 
             element.classList.toggle('valid', rule.displayValid);
-            icon.textContent = rule.displayValid ? '✓' : 'x';
+            icon.textContent = rule.displayValid ? '\u2713' : 'x';
         });
 
         barFill.style.width = progress + '%';
@@ -78,7 +78,7 @@
             strengthText.textContent = 'Senha fraca';
             strengthText.classList.add('weak');
         } else if (validCount <= 5) {
-            strengthText.textContent = 'Quase la';
+            strengthText.textContent = 'Quase lá';
             strengthText.classList.add('medium');
         } else {
             strengthText.textContent = 'Senha forte';
@@ -88,7 +88,7 @@
         passwordWrap.classList.toggle('valid', passwordIsValid);
         lockBox.classList.toggle('valid', passwordIsValid);
         lockIcon.className = passwordIsValid ? 'bi bi-lock-fill' : 'bi bi-unlock-fill';
-        bubbleTitle.textContent = passwordIsValid ? 'Senha forte' : 'Forca da senha';
+        bubbleTitle.textContent = passwordIsValid ? 'Senha forte' : 'Força da senha';
         bubbleSub.textContent = passwordIsValid
             ? 'Tudo certo. Agora repita a senha.'
             : `${validCount} de ${rules.length} requisitos`;
@@ -125,7 +125,7 @@
                 confirmWrap.classList.add('error');
                 connector.classList.add('error');
                 confirmMsg.classList.add('error');
-                confirmMsg.textContent = 'Falta so ajustar: as senhas ainda nao coincidem.';
+                confirmMsg.textContent = 'Falta só ajustar: as senhas ainda não coincidem.';
             }
         }
 
@@ -204,14 +204,14 @@
 
         if (nameField.value.trim() === '' || usernameField.value.trim() === '') {
             event.preventDefault();
-            showFormMessage('Informe nome e usuario para criar a conta.');
+            showFormMessage('Informe nome e usuário para criar a conta.');
             return;
         }
 
         if (!isPasswordValid()) {
             event.preventDefault();
             passwordBubble.classList.add('show');
-            showFormMessage('A senha ainda nao atende a todos os requisitos.');
+            showFormMessage('A senha ainda não atende a todos os requisitos.');
             return;
         }
 

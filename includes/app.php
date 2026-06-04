@@ -86,7 +86,7 @@ function render_footer(bool $compact = false): void
             <div class="row align-items-center gy-3">
                 <div class="col-md-6">
                     <h5 class="fw-bold mb-1">HMS - Hospital Management System</h5>
-                    <p class="mb-0 text-muted">Transformando a gestao hospitalar brasileira.</p>
+                    <p class="mb-0 text-muted">Transformando a gestão hospitalar brasileira.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <span class="footer-link-muted me-3">Termos</span>
@@ -109,23 +109,112 @@ function render_scripts(): void
     <script>
         (function () {
             const toggle = document.querySelector('[data-sidebar-toggle]');
-            if (!toggle) {
+            const sidebar = document.querySelector('.sidebar');
+            if (!toggle || !sidebar) {
                 return;
             }
 
             const storageKey = 'hms-sidebar-collapsed';
+            const scrollStorageKey = 'hms-sidebar-scroll-top';
             const applyState = function (collapsed) {
                 document.body.classList.toggle('sidebar-collapsed', collapsed);
                 toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
                 toggle.setAttribute('aria-label', collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral');
             };
+            const saveSidebarScroll = function () {
+                localStorage.setItem(scrollStorageKey, String(sidebar.scrollTop));
+            };
+            const restoreSidebarScroll = function () {
+                const savedScroll = Number(localStorage.getItem(scrollStorageKey) || '0');
+
+                if (!Number.isFinite(savedScroll) || savedScroll <= 0) {
+                    return;
+                }
+
+                sidebar.scrollTop = savedScroll;
+                requestAnimationFrame(function () {
+                    sidebar.scrollTop = savedScroll;
+                });
+            };
 
             applyState(localStorage.getItem(storageKey) === '1');
+            restoreSidebarScroll();
 
             toggle.addEventListener('click', function () {
                 const collapsed = !document.body.classList.contains('sidebar-collapsed');
                 localStorage.setItem(storageKey, collapsed ? '1' : '0');
                 applyState(collapsed);
+                saveSidebarScroll();
+            });
+
+            sidebar.addEventListener('scroll', saveSidebarScroll, { passive: true });
+            sidebar.querySelectorAll('a[href]').forEach(function (link) {
+                link.addEventListener('click', saveSidebarScroll);
+            });
+            window.addEventListener('beforeunload', saveSidebarScroll);
+        })();
+        (function () {
+            const alerts = Array.from(document.querySelectorAll('.alert[role="alert"], .alert[role="status"]'))
+                .filter(function (alert) {
+                    return !alert.closest('.modal') && alert.dataset.inlineAlert !== 'true';
+                });
+
+            if (alerts.length === 0) {
+                return;
+            }
+
+            const stack = document.createElement('div');
+            stack.className = 'hms-toast-stack';
+            stack.setAttribute('aria-live', 'polite');
+            stack.setAttribute('aria-atomic', 'false');
+            document.body.appendChild(stack);
+
+            alerts.forEach(function (alert) {
+                const toast = document.createElement('div');
+                const isError = alert.classList.contains('alert-danger');
+                const isSuccess = alert.classList.contains('alert-success');
+                const isWarning = alert.classList.contains('alert-warning');
+
+                toast.className = 'hms-toast';
+                if (isError) {
+                    toast.classList.add('error');
+                } else if (isSuccess) {
+                    toast.classList.add('success');
+                } else if (isWarning) {
+                    toast.classList.add('warning');
+                }
+
+                const body = document.createElement('div');
+                body.className = 'hms-toast-body';
+                body.textContent = alert.textContent.trim();
+
+                const close = document.createElement('button');
+                close.type = 'button';
+                close.className = 'hms-toast-close';
+                close.setAttribute('aria-label', 'Fechar aviso');
+                close.textContent = 'x';
+
+                const progress = document.createElement('div');
+                progress.className = 'hms-toast-progress';
+
+                toast.appendChild(body);
+                toast.appendChild(close);
+                toast.appendChild(progress);
+                stack.appendChild(toast);
+                alert.remove();
+
+                const dismiss = function () {
+                    toast.classList.add('leaving');
+                    window.setTimeout(function () {
+                        toast.remove();
+                        if (stack.children.length === 0) {
+                            stack.remove();
+                        }
+                    }, 180);
+                };
+
+                close.addEventListener('click', dismiss);
+                window.setTimeout(dismiss, 5000);
             });
         })();
     </script>
@@ -180,6 +269,7 @@ function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#
     $settingsHref = $logoutHref !== '#'
         ? preg_replace('/logout\.php(?:\?.*)?$/', 'settings.php', $logoutHref)
         : url_from_page('settings.php');
+    $userPhoto = current_user_field('fotoBase64', '');
     ?>
                         <div class="dropdown">
                             <button type="button" class="user-profile dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menu do usuário">
@@ -187,8 +277,12 @@ function render_user_menu(string $userName = 'Usuário', string $logoutHref = '#
                                     <div class="fw-bold small"><?= h($userName) ?></div>
                                     <div class="text-muted user-role">Administrador</div>
                                 </div>
-                                <div class="user-icon">
+                                <div class="user-icon<?= $userPhoto !== '' ? ' has-photo' : '' ?>">
+<?php if ($userPhoto !== ''): ?>
+                                    <img src="<?= h($userPhoto) ?>" alt="Foto de perfil">
+<?php else: ?>
                                     <i class="bi bi-person-fill" aria-hidden="true"></i>
+<?php endif; ?>
                                 </div>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
