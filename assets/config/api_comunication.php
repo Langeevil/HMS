@@ -8,6 +8,11 @@ $authConfig = [
     'login' => [
         'attempts' => [
             [
+                'endpoint' => '/api/auth/login',
+                'content_type' => 'application/json',
+                'accept' => 'application/json',
+            ],
+            [
                 'endpoint' => '/login',
                 'content_type' => 'application/x-www-form-urlencoded',
                 'accept' => 'application/json, text/plain, */*',
@@ -17,6 +22,11 @@ $authConfig = [
     ],
     'register' => [
         'attempts' => [
+            [
+                'endpoint' => '/api/auth/cadastro',
+                'content_type' => 'application/json',
+                'accept' => 'application/json',
+            ],
             [
                 'endpoint' => '/cadastro',
                 'content_type' => 'application/x-www-form-urlencoded',
@@ -379,13 +389,22 @@ function apiEncodePayload(?array $payload, string $contentType): ?string
     };
 }
 
-function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlError, array $responseHeaders = []): array
+function apiNormalizeResponse(bool|string $rawBody, int $httpCode, string $curlError, array $responseHeaders = [], string $url = ''): array
 {
     if ($rawBody === false) {
+        $error = $curlError !== '' ? $curlError : 'Erro desconhecido ao chamar a API.';
+        if ($httpCode === 0) {
+            $target = $url !== '' ? ' em ' . $url : '';
+            $error = 'Nao foi possivel conectar a API HMS' . $target . '. Verifique se a API Java esta ligada na porta 8081.';
+            if ($curlError !== '') {
+                $error .= ' Detalhe: ' . $curlError;
+            }
+        }
+
         return [
             'success' => false,
             'status' => $httpCode,
-            'error' => $curlError !== '' ? $curlError : 'Erro desconhecido ao chamar a API.',
+            'error' => $error,
             'data' => null,
             'headers' => $responseHeaders,
         ];
@@ -481,7 +500,7 @@ function apiRequest(string $method, string $endpoint, ?array $payload = null, ar
     $curlError = curl_error($ch);
     curl_close($ch);
 
-    return apiNormalizeResponse($rawBody, $httpCode, $curlError, $responseHeaders);
+    return apiNormalizeResponse($rawBody, $httpCode, $curlError, $responseHeaders, $url);
 }
 
 function authenticateUser(string $username, string $password): array
@@ -533,7 +552,26 @@ function authenticateUser(string $username, string $password): array
             $failureError = 'Credenciais invalidas ou login sem redirecionamento para ' . $attempt['success_redirect_contains'] . '.';
         }
 
-        if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
+        if (!$expectsRedirect && !in_array($status, [404, 405], true)) {
+            return [
+                'success' => false,
+                'status' => $status,
+                'error' => $status === 0
+                    ? 'Falha de comunicacao com a API HMS. ' . (string) $failureError
+                    : ((string) ($failureError ?: 'Falha ao autenticar na API.')),
+                'data' => $response['data'] ?? null,
+                'headers' => $response['headers'] ?? [],
+                'debug_attempts' => $attemptErrors,
+            ];
+        }
+
+        $bestStatus = (int) ($bestFailure['status'] ?? 0);
+        if (
+            $bestFailure === null
+            || $status >= 500
+            || ($status >= 400 && $bestStatus < 500)
+            || ($bestStatus === 404 && $expectsRedirect && $status >= 200 && $status < 300)
+        ) {
             $bestFailure = [
                 'status' => $status,
                 'endpoint' => $attempt['endpoint'],
@@ -553,12 +591,14 @@ function authenticateUser(string $username, string $password): array
         'success' => false,
         'status' => (int) ($bestFailure['status'] ?? 0),
         'error' => $bestFailure !== null
-            ? sprintf(
+            ? ((int) ($bestFailure['status'] ?? 0) === 0
+                ? 'Falha de comunicacao com a API HMS. ' . (string) ($bestFailure['error'] ?? '')
+                : sprintf(
                 'Falha ao autenticar na API. %s respondeu HTTP %d%s',
                 $bestFailure['endpoint'],
                 $bestFailure['status'],
                 !empty($bestFailure['error']) ? ' (' . $bestFailure['error'] . ')' : ''
-            )
+            ))
             : 'Falha ao autenticar na API.',
         'data' => null,
         'headers' => [],
@@ -634,7 +674,26 @@ function registerUser(string $nome, string $username, string $password, ?string 
             $failureError = 'Cadastro recusado pela API ou sem redirecionamento para ' . $attempt['success_redirect_contains'] . '.';
         }
 
-        if ($bestFailure === null || $status >= 500 || ($status >= 400 && ($bestFailure['status'] ?? 0) < 500)) {
+        if (!$expectsRedirect && !in_array($status, [404, 405], true)) {
+            return [
+                'success' => false,
+                'status' => $status,
+                'error' => $status === 0
+                    ? 'Falha de comunicacao com a API HMS. ' . (string) $failureError
+                    : ((string) ($failureError ?: 'Falha ao cadastrar na API HMS.')),
+                'data' => $response['data'] ?? null,
+                'headers' => $response['headers'] ?? [],
+                'debug_attempts' => $attemptErrors,
+            ];
+        }
+
+        $bestStatus = (int) ($bestFailure['status'] ?? 0);
+        if (
+            $bestFailure === null
+            || $status >= 500
+            || ($status >= 400 && $bestStatus < 500)
+            || ($bestStatus === 404 && $expectsRedirect && $status >= 200 && $status < 300)
+        ) {
             $bestFailure = [
                 'status' => $status,
                 'endpoint' => $attempt['endpoint'],
@@ -654,12 +713,14 @@ function registerUser(string $nome, string $username, string $password, ?string 
         'success' => false,
         'status' => (int) ($bestFailure['status'] ?? 0),
         'error' => $bestFailure !== null
-            ? sprintf(
+            ? ((int) ($bestFailure['status'] ?? 0) === 0
+                ? 'Falha de comunicacao com a API HMS. ' . (string) ($bestFailure['error'] ?? '')
+                : sprintf(
                 'Falha ao cadastrar na API HMS. %s respondeu HTTP %d%s',
                 $bestFailure['endpoint'],
                 $bestFailure['status'],
                 !empty($bestFailure['error']) ? ' (' . $bestFailure['error'] . ')' : ''
-            )
+            ))
             : 'Falha ao cadastrar na API HMS.',
         'data' => null,
         'headers' => [],

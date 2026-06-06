@@ -16,8 +16,8 @@ $usuario = [
 $erro = null;
 $formAction = $formAction ?? url($basePath, 'pages/cadastro.php');
 
-// Endpoint MVC de cadastro da API HMS. A API Java atual usa POST /cadastro.
-$registrationApiEndpoint = $registrationApiEndpoint ?? '/cadastro';
+// Usa a ordem configurada em api_comunication.php: endpoint JSON primeiro e MVC legado como fallback.
+$registrationApiEndpoint = $registrationApiEndpoint ?? null;
 
 function cadastro_password_errors(string $password): array
 {
